@@ -92,3 +92,8 @@ Bell was Sat Sept 26 10:00am EDT. If a milestone runs 90 min late, take the next
 - Done check: (1) `node --test` 7/7 pass. (2) `vercel --prod` live at https://low-tide-nine.vercel.app, 200, full demo path works, offline path proven at M5. (3) Public repo chichiroxursox-droid/low-tide, no `.env*` in the tree or history. (4) README has what, how, limitations, AI disclosure. (5) ~/Desktop/low-tide-demo.mp4, H.264, 72.8s, frames checked. (6) DEVPOST.md, 691 words, names Sustainability and Best Use of Gemini. (7) This log has M1 to M8
 - Next step: Ethan submits on Devpost (see tasks/todo.md). Nothing left for the build
 - Scope cuts so far: none
+
+### Sat 12:55pm, M6 addendum (video only)
+- Re-recorded the backup video. A caption said the live claim was "copied off a real package", which wasn't true (I wrote the claim text). It now reads "Now a claim typed in live, checked by Gemini 2.5 Flash."
+- ~/Desktop/low-tide-demo.mp4 is now H.264, 1280x800, 76.9s. All frames checked, no artifacts, footer caption present at the end
+- No app code changed. v1 tag still matches what is deployed

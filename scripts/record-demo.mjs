@@ -74,7 +74,7 @@ await caption("The Guides never mention ocean plastic, so Low Tide says so inste
 await wait(7000);
 
 await top();
-await caption("Now a live claim copied off a real package, checked by Gemini 2.5 Flash.");
+await caption("Now a claim typed in live, checked by Gemini 2.5 Flash.");
 await page.getByLabel("Green claim").fill("");
 await page.getByLabel("Green claim").pressSequentially(LIVE, { delay: 45 });
 await page.getByRole("button", { name: "Check claim" }).click();
