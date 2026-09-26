@@ -99,6 +99,28 @@ test("guardBrand drops evidence from the brand's own sites and claims from other
   assert.equal(notTheirs.removed.wrongSite, 1);
 });
 
+test("guardBrand drops evidence from any host the brand owns, subdomains included", () => {
+  const pages = [
+    page("S1", "brand.example", CLAIM),
+    page("S2", "brandgroup.example", PUSH),
+    page("S3", "brandgroup.example", BACKS), // a brand host, but this page isn't listed in ownSites
+    page("S4", "eu.brand.example", BACKS),
+  ];
+  const { claims, removed } = guardBrand(
+    pick(
+      [
+        { stance: "backs", sourceId: "S3", quote: BACKS },
+        { stance: "backs", sourceId: "S4", quote: BACKS },
+      ],
+      {},
+      ["S1", "S2"],
+    ),
+    pages,
+  );
+  assert.equal(claims[0].evidence.length, 0);
+  assert.equal(removed.wrongSite, 2);
+});
+
 test("guardBrand drops quotes that use a banned word", () => {
   const { claims, removed } = guardBrand(pick([{ stance: "pushes_back", sourceId: "S5", quote: LEGAL }]), PAGES);
   assert.equal(claims[0].evidence.length, 0);

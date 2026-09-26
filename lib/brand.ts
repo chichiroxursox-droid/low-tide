@@ -120,11 +120,15 @@ const sid = (s: string) => s.match(/S\d+/i)?.[0].toUpperCase() ?? "";
 export function guardBrand(picked: Picked, pages: SourcePage[]): { claims: BrandClaim[]; removed: Removed } {
   const byId = new Map(pages.map((p) => [p.id, p]));
   const own = new Set(picked.ownSites.map(sid));
+  // ponytail: exact host or subdomain of a brand host. A sibling like patagonia.com.hk vs patagonia.com only counts
+  // if the model lists it; catching those needs a public-suffix list.
+  const ownHosts = pages.filter((p) => own.has(p.id)).map((p) => p.host);
+  const onOwnHost = (host: string) => ownHosts.some((h) => host === h || host.endsWith(`.${h}`));
   const removed: Removed = { mismatch: 0, wrongSite: 0, banned: 0 };
-  const check = (quote: string, id: string, fromBrand: boolean, claimHost?: string): SourcePage | keyof Removed => {
+  const check = (quote: string, id: string, fromBrand: boolean): SourcePage | keyof Removed => {
     const page = byId.get(sid(id));
     if (!page || !verifyQuote(quote, page.text)) return "mismatch";
-    if (own.has(page.id) !== fromBrand || (claimHost !== undefined && page.host === claimHost)) return "wrongSite";
+    if (fromBrand ? !own.has(page.id) : onOwnHost(page.host)) return "wrongSite";
     if (BANNED.test(quote)) return "banned";
     return page;
   };
@@ -138,7 +142,7 @@ export function guardBrand(picked: Picked, pages: SourcePage[]): { claims: Brand
     }
     const evidence: Evidence[] = [];
     for (const e of c.evidence.slice(0, 2)) {
-      const src = check(e.quote, e.sourceId, false, page.host);
+      const src = check(e.quote, e.sourceId, false);
       if (typeof src === "string") removed[src]++;
       else evidence.push({ stance: e.stance, quote: e.quote, url: src.url, host: src.host });
     }
