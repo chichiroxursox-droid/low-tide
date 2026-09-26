@@ -67,10 +67,12 @@ export function isSafeUrl(input: string): URL | null {
   return u;
 }
 
-// A brand name stays a name. Anything that looks like a link must be a safe one, or the input is refused (null).
+// A brand name stays a name. Without a scheme, only "www." or a path makes it a link, so "L.L.Bean" and "J.Crew"
+// stay names (a bare "patagonia.com" is searched as a name too). Anything that looks like a link must be a safe one,
+// or the input is refused (null).
 export function parseBrandInput(input: string): BrandInput | null {
   const s = input.trim();
-  if (!SCHEME.test(s) && !DOMAINISH.test(s)) return { name: s };
+  if (!SCHEME.test(s) && !(DOMAINISH.test(s) && /^www\.|[/?#]/i.test(s))) return { name: s };
   const url = isSafeUrl(s);
   return url ? { name: url.hostname.replace(/^www\./, ""), url } : null;
 }

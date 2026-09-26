@@ -191,6 +191,9 @@ test("isSafeUrl allows public web pages and refuses everything else", () => {
 test("parseBrandInput tells brand names from links", () => {
   assert.deepEqual(parseBrandInput("H&M"), { name: "H&M" });
   assert.deepEqual(parseBrandInput("  Patagonia: Worn Wear "), { name: "Patagonia: Worn Wear" });
+  assert.deepEqual(parseBrandInput("L.L.Bean"), { name: "L.L.Bean" });
+  assert.deepEqual(parseBrandInput("J.Crew"), { name: "J.Crew" });
+  assert.equal(parseBrandInput("patagonia.com/sustainability")?.url?.href, "https://patagonia.com/sustainability");
   const link = parseBrandInput("www.patagonia.com/our-footprint")!;
   assert.equal(link.name, "patagonia.com");
   assert.equal(link.url?.href, "https://www.patagonia.com/our-footprint");
