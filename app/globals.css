@@ -1,26 +1,38 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-flat: #e7ece8;
+  --color-deep: #12343b;
+  --color-buoy: #e8b04b;
+  --color-glass: #9ccbb8;
+  --color-sun: #f7e49a;
+  --font-sans: var(--font-schibsted);
+  --font-serif: var(--font-newsreader);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-flat);
+  color: var(--color-deep);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-deep);
+  outline-offset: 3px;
+}
+
+/* The one motion moment: the waterline draws itself when an answer lands. */
+.waterline path {
+  stroke-dasharray: 1;
+  animation: tideline 900ms ease-out both;
+}
+@keyframes tideline {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .waterline path { animation: none; }
 }
