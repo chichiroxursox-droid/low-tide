@@ -28,7 +28,7 @@ input (name or link, unchanged)
   -> readPage on each (unchanged), pasted link first
   -> no readable page: "Couldn't find enough about X to check."
   -> Call 2: pickQuotes, no tools, structured output:
-     { ownSites, checks: [{ check, findings: [{ sign: good|red, sourceId, quote, note }] }] }
+     { checks: [{ check, findings: [{ sign: good|red, sourceId, quote, note }] }] }
   -> guardChecks (pure): verify each quote, apply source rules, derive each check's mark
   -> verdictFor (pure, run by the route at serve time for live and sample results alike)
 ```
