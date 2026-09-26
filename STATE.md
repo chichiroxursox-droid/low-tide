@@ -29,3 +29,12 @@ Bell was Sat Sept 26 10:00am EDT. If a milestone runs 90 min late, take the next
 - Notes: GitHub repo public at chichiroxursox-droid/low-tide. Vercel project `low-tide` on team chiethan. AI SDK installed as v7, so structured output uses `generateText` + `Output.object`
 - Next step: M2, type the six Green Guides sections from eCFR into `lib/guides.json`, write `verifyQuote` and its test
 - Scope cuts so far: none
+
+### Sat 11:58am, M2
+- Milestone: hit, an hour ahead of the 1:00pm target
+- Prod URL works: yes (200, redeployed)
+- Tests pass: yes, `node --test` 6/6 (real quote, messy typography, one word changed, wrong section, too short, guardFindings filter)
+- What broke: a test quote was only 4 words and the 6-word minimum rejected it. The test was wrong, not the guard
+- Notes: `lib/guides.json` built from the eCFR versioner API (as of 2026-09-24), with examples included and footnote superscripts stripped. About 29k chars total, small enough to send all six sections every call. `guardFindings` normalizes "§ 260.8(b)" to "260.8" and blanks section/quote on not_covered
+- Next step: M3, the Gemini route plus fixtures for the 4 sample claims
+- Scope cuts so far: none
