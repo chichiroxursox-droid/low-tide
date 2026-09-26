@@ -278,8 +278,8 @@ export default function Home() {
             </>
           ) : (
             <>
-              Type a brand. Gemini 2.5 Flash searches the web for what the brand says about itself and what others found,
-              and Low Tide checks every quote word for word against the page it came from.
+              Type a brand or a link to its sustainability page. Gemini 2.5 Flash finds what the brand says and what
+              others found, and Low Tide checks every quote word for word against the page it came from.
             </>
           )}
         </p>
@@ -359,7 +359,7 @@ export default function Home() {
             maxLength={300}
             value={brand}
             onChange={(e) => setBrand(e.target.value)}
-            placeholder="Brand name or link to their sustainability page"
+            placeholder="Brand name or a link"
             className="w-full rounded-md border border-deep/25 bg-white/70 p-4 text-lg placeholder:text-deep/45 focus:border-deep focus:outline-none"
           />
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
