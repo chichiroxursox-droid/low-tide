@@ -1,26 +1,24 @@
 import { generateText, Output } from "ai";
 import { google, type GoogleProviderMetadata } from "@ai-sdk/google";
 import { z } from "zod";
-import { askGemini, MODEL } from "./check.ts";
-import { BANNED, soften, verifyQuote, type Finding } from "./guard.ts";
+import { MODEL } from "./check.ts";
+import { BANNED, soften, verifyQuote } from "./guard.ts";
 
 export type Page = { url: string; host: string; text: string };
 export type SourcePage = Page & { id: string };
-export type Stance = "backs" | "pushes_back";
+export const CHECKS = ["certifications", "climate", "ratings", "watchdogs"] as const;
+export type CheckKey = (typeof CHECKS)[number];
+export type Sign = "good" | "red";
+export type Mark = "good" | "red" | "both" | "not_found";
+export type Verdict = "strong" | "mixed" | "red_flags" | "not_enough";
 export type Picked = {
   ownSites: string[];
-  claims: { claim: string; sourceId: string; quote: string; evidence: { stance: Stance; sourceId: string; quote: string }[] }[];
+  checks: { check: CheckKey; findings: { sign: Sign; sourceId: string; quote: string; note: string }[] }[];
 };
-export type Evidence = { stance: Stance; quote: string; url: string; host: string };
-export type BrandClaim = { claim: string; quote: string; url: string; host: string; evidence: Evidence[] };
+export type Signal = { sign: Sign; quote: string; note: string; url: string; host: string; own: boolean };
+export type CheckResult = { check: CheckKey; mark: Mark; signals: Signal[] };
 export type Removed = { mismatch: number; wrongSite: number; banned: number };
-export type BrandCheck = {
-  brand: string;
-  pagesFound: number;
-  pagesRead: number;
-  claims: (BrandClaim & { findings: Finding[] | null })[]; // null: the Guides call failed
-  removed: Removed;
-};
+export type BrandCheck = { brand: string; pagesFound: number; pagesRead: number; checks: CheckResult[]; removed: Removed };
 export type BrandInput = { name: string; url?: URL };
 
 const ENTITIES: Record<string, string> = {
@@ -126,86 +124,117 @@ export async function readPage(url: string): Promise<Page | null> {
 
 const sid = (s: string) => s.match(/S\d+/i)?.[0].toUpperCase() ?? "";
 
-// Keeps only quotes that are really on the page they cite. Claims must come from the brand's own sites,
-// evidence from anyone else. A dropped claim takes its evidence with it (one removal).
-export function guardBrand(picked: Picked, pages: SourcePage[]): { claims: BrandClaim[]; removed: Removed } {
+// A brand can't vouch for itself on these: a good sign has to come from a site it doesn't own.
+const INDEPENDENT_GOOD: CheckKey[] = ["certifications", "ratings"];
+
+// Keeps only findings whose quote is really on the page they cite, then marks each of the four checks.
+export function guardChecks(picked: Picked, pages: SourcePage[]): { checks: CheckResult[]; removed: Removed } {
   const byId = new Map(pages.map((p) => [p.id, p]));
   const own = new Set(picked.ownSites.map(sid));
-  // ponytail: exact host or subdomain of a brand host. A sibling like patagonia.com.hk vs patagonia.com only counts
-  // if the model lists it; catching those needs a public-suffix list.
+  // ponytail: exact host or subdomain of a brand-owned page. A sibling domain only counts if the model lists it.
   const ownHosts = pages.filter((p) => own.has(p.id)).map((p) => p.host);
-  const onOwnHost = (host: string) => ownHosts.some((h) => host === h || host.endsWith(`.${h}`));
+  const isOwn = (p: SourcePage) => own.has(p.id) || ownHosts.some((h) => p.host === h || p.host.endsWith(`.${h}`));
   const removed: Removed = { mismatch: 0, wrongSite: 0, banned: 0 };
-  const check = (quote: string, id: string, fromBrand: boolean): SourcePage | keyof Removed => {
-    const page = byId.get(sid(id));
-    if (!page || !verifyQuote(quote, page.text)) return "mismatch";
-    if (fromBrand ? !own.has(page.id) : onOwnHost(page.host)) return "wrongSite";
-    if (BANNED.test(quote) || BANNED.test(page.host)) return "banned";
-    return page;
-  };
 
-  const claims: BrandClaim[] = [];
-  for (const c of picked.claims.slice(0, 3)) {
-    const page = check(c.quote, c.sourceId, true);
-    if (typeof page === "string") {
-      removed[page]++;
-      continue;
+  const checks = CHECKS.map((check): CheckResult => {
+    const signals: Signal[] = [];
+    for (const f of picked.checks.find((c) => c.check === check)?.findings.slice(0, 2) ?? []) {
+      const page = byId.get(sid(f.sourceId));
+      if (!page || !verifyQuote(f.quote, page.text)) {
+        removed.mismatch++;
+        continue;
+      }
+      const mine = isOwn(page);
+      if (mine && f.sign === "good" && INDEPENDENT_GOOD.includes(check)) {
+        removed.wrongSite++;
+        continue;
+      }
+      if (BANNED.test(f.quote) || BANNED.test(page.host)) {
+        removed.banned++;
+        continue;
+      }
+      signals.push({ sign: f.sign, quote: f.quote, note: soften(f.note), url: page.url, host: page.host, own: mine });
     }
-    const evidence: Evidence[] = [];
-    for (const e of c.evidence.slice(0, 2)) {
-      const src = check(e.quote, e.sourceId, false);
-      if (typeof src === "string") removed[src]++;
-      else evidence.push({ stance: e.stance, quote: e.quote, url: src.url, host: src.host });
-    }
-    claims.push({ claim: soften(c.claim), quote: c.quote, url: page.url, host: page.host, evidence });
-  }
-  return { claims, removed };
+    const good = signals.some((s) => s.sign === "good");
+    const red = signals.some((s) => s.sign === "red");
+    return { check, mark: good && red ? "both" : good ? "good" : red ? "red" : "not_found", signals };
+  });
+  return { checks, removed };
 }
 
-// Call 1. Search only finds links. Gemini's text is thrown away, and the links come from the
-// SDK's sources, never from text the model wrote (it garbles Google's long redirect links).
-export async function findSources(query: string): Promise<string[]> {
-  const r = await generateText({
-    model: google(MODEL),
-    tools: { google_search: google.tools.googleSearch({}) },
-    prompt: `Search the web for: (a) the official sustainability or environment page of the brand "${query}", and (b) 4 to 6 independent sources that evaluate that brand's environmental claims. Prefer news outlets, NGO reports, certifiers, and regulators over blogs and marketing sites. Briefly describe what each source says.`,
-    temperature: 0,
-    maxRetries: 1,
-  });
-  const meta = r.providerMetadata?.google as GoogleProviderMetadata | undefined;
-  const urls = [
-    ...r.sources.flatMap((s) => (s.sourceType === "url" ? [s.url] : [])),
-    ...(meta?.groundingMetadata?.groundingChunks ?? []).flatMap((c) => (c.web?.uri ? [c.web.uri] : [])),
-  ];
-  return [...new Set(urls)].slice(0, 8);
+// The verdict is a rule over the marks, never the model's opinion.
+export function verdictFor(checks: CheckResult[]): { verdict: Verdict; good: number; red: number } {
+  const count = (m: Mark) => checks.filter((c) => c.mark === m).length;
+  const good = count("good");
+  const red = count("red");
+  const both = count("both");
+  const evidence = checks.length - count("not_found");
+  const verdict: Verdict =
+    evidence < 2 ? "not_enough" : red > 0 && red >= good ? "red_flags" : good >= 3 && red === 0 && both === 0 ? "strong" : "mixed";
+  return { verdict, good, red };
+}
+
+const SEARCHES: Record<CheckKey, (brand: string) => string> = {
+  certifications: (b) => `Which third-party sustainability certifications does the brand "${b}" hold (B Corp, Fair Trade, bluesign, FSC, Cradle to Cradle, GOTS)? Prefer the certifier's own pages and news coverage.`,
+  climate: (b) => `Does the brand "${b}" have a climate target validated by the Science Based Targets initiative, and does it publish its greenhouse gas emissions? Include any reports of targets missed or dropped.`,
+  ratings: (b) => `How do independent sustainability ratings score the brand "${b}" (Good On You, CDP, Fashion Transparency Index, or similar)?`,
+  watchdogs: (b) => `Has any regulator, consumer authority, or watchdog group acted on or investigated the environmental claims of the brand "${b}"?`,
+};
+
+// Call 1, once per check in parallel. Search only finds links: Gemini's text is thrown away, and the links come
+// from the SDK's sources, never from text the model wrote (it garbles Google's long redirect links).
+export async function findSources(brand: string): Promise<string[]> {
+  const lists = await Promise.all(
+    CHECKS.map(async (check) => {
+      const r = await generateText({
+        model: google(MODEL),
+        tools: { google_search: google.tools.googleSearch({}) },
+        prompt: `Search the web. ${SEARCHES[check](brand)} Briefly describe what each source says.`,
+        temperature: 0,
+        maxRetries: 1,
+      });
+      const meta = r.providerMetadata?.google as GoogleProviderMetadata | undefined;
+      const urls = [
+        ...r.sources.flatMap((s) => (s.sourceType === "url" ? [s.url] : [])),
+        ...(meta?.groundingMetadata?.groundingChunks ?? []).flatMap((c) => (c.web?.uri ? [c.web.uri] : [])),
+      ];
+      return [...new Set(urls)].slice(0, 4);
+    }).map((p) => p.catch((): string[] => [])), // ponytail: a failed search just brings no links for that check
+  );
+  // Interleave so every check gets a share of the 12 pages.
+  const urls: string[] = [];
+  for (let i = 0; i < 4; i++) for (const list of lists) if (list[i]) urls.push(list[i]);
+  return [...new Set(urls)].slice(0, 12);
 }
 
 const quoteField = z.string().describe("One continuous passage of 10 to 40 words, copied character for character from that source");
 const pickSchema = z.object({
   ownSites: z.array(z.string()).describe('Ids like "S1" of every source that belongs to the brand itself'),
-  claims: z.array(
+  checks: z.array(
     z.object({
-      claim: z.string().describe("Short label for the claim, 3 to 8 words"),
-      sourceId: z.string().describe('Id of the brand-owned source quoted, like "S1"'),
-      quote: quoteField,
-      evidence: z.array(
+      check: z.enum(CHECKS),
+      findings: z.array(
         z.object({
-          stance: z.enum(["backs", "pushes_back"]),
-          sourceId: z.string().describe('Id of an independent source, like "S3"'),
+          sign: z.enum(["good", "red"]),
+          sourceId: z.string().describe('Id of the source quoted, like "S3"'),
           quote: quoteField,
+          note: z.string().describe("One plain sentence for a shopper on what this passage shows"),
         }),
       ),
     }),
   ),
 });
 
-const PICK_SYSTEM = `You compare a brand's environmental claims with independent sources, for a shopper deciding whether to buy from it. You get numbered source pages (S1, S2, ...).
+const PICK_SYSTEM = `You check whether a brand's sustainability holds up, for a shopper deciding whether to buy from it. You get numbered source pages (S1, S2, ...). Use only what these pages say.
 
 ownSites: the ids of every source that belongs to the brand itself: its main site, group or corporate site, regional sites, and its own reports.
-claims: up to 3 distinct environmental claims the brand makes about itself, each quoted from one of its own sources. claim is a short label of 3 to 8 words.
-evidence: for each claim, up to 2 passages from sources NOT in ownSites that back that claim up or push back on it. Only use a passage that talks about that specific claim or topic. An empty list is fine.
-Every quote is one continuous passage of 10 to 40 words copied character for character from the source you name. No ellipses, no paraphrase, no stitching sentences together.
-If none of the sources belongs to the brand, return empty ownSites and claims. Never use the words illegal, violation, or lawsuit.`;
+checks: one entry for each check below that at least one source speaks to, with up to 2 findings each.
+- certifications: third-party sustainability certifications the brand holds (B Corp, Fair Trade, bluesign, FSC, Cradle to Cradle, GOTS). good if a source confirms a current certification; red if one was lost, suspended, or refused.
+- climate: good if a source shows a climate target validated by the Science Based Targets initiative, or published greenhouse gas emissions; red if a source reports targets missed or dropped, or emissions rising.
+- ratings: independent sustainability ratings (Good On You, CDP, Fashion Transparency Index, or similar). good for a high rating, red for a low one. Quote the passage that states the rating.
+- watchdogs: red if a regulator, consumer authority, or watchdog group acted on or criticized the brand's environmental claims; good only if one explicitly cleared them.
+Each finding: its sign, the id of the source, a quote, and a note. The quote is one continuous passage of 10 to 40 words copied character for character from that source: no ellipses, no paraphrase, no stitching sentences together. The note is one plain sentence a shopper can follow.
+Only include a finding when the quoted passage itself shows it. The absence of news is not a finding. Never use the words illegal, violation, or lawsuit.`;
 
 // Call 2. No tools, so structured output works. Gemini only picks and quotes from text we fetched.
 export async function pickQuotes(brand: string, pages: SourcePage[]): Promise<Picked> {
@@ -221,9 +250,7 @@ export async function pickQuotes(brand: string, pages: SourcePage[]): Promise<Pi
   return output;
 }
 
-const NONE: Removed = { mismatch: 0, wrongSite: 0, banned: 0 };
-
-// The whole brand check. Guides findings come back raw: the route guards them at serve time, like the claim route.
+// The whole brand check. The verdict is left to verdictFor, which the route runs at serve time.
 export async function checkBrand(input: BrandInput): Promise<BrandCheck> {
   const [first, found] = await Promise.all([input.url ? readPage(input.url.href) : null, findSources(input.name)]);
   const read = await Promise.all(found.map(readPage));
@@ -232,13 +259,6 @@ export async function checkBrand(input: BrandInput): Promise<BrandCheck> {
     .filter((p, i, all) => all.findIndex((q) => q.url === p.url) === i)
     .map((p, i) => ({ ...p, id: `S${i + 1}` }));
   const base = { brand: input.name, pagesFound: found.length + (input.url ? 1 : 0), pagesRead: pages.length };
-  if (!pages.length) return { ...base, claims: [], removed: { ...NONE } };
-
-  const { claims, removed } = guardBrand(await pickQuotes(input.name, pages), pages);
-  // A failed Guides call marks that card's reading as missing (null) instead of failing the whole check,
-  // so the page can tell it apart from a quote with nothing the Guides cover ([]).
-  const withGuides = await Promise.all(
-    claims.map(async (c) => ({ ...c, findings: await askGemini(c.quote).catch(() => null) })),
-  );
-  return { ...base, claims: withGuides, removed };
+  if (!pages.length) return { ...base, ...guardChecks({ ownSites: [], checks: [] }, []) };
+  return { ...base, ...guardChecks(await pickQuotes(input.name, pages), pages) };
 }

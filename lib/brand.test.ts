@@ -2,31 +2,17 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
-import { htmlToText, isSafeUrl, parseBrandInput, readPage, guardBrand, type Picked, type SourcePage } from "./brand.ts";
-import { verifyQuote } from "./guard.ts";
-
-const CLAIM = "We repair more than 100,000 items a year so our clothes stay in use for as long as possible";
-const BACKS = "An independent audit found the repair program kept more garments in use than any other retailer it surveyed";
-const PUSH = "Critics say a repair program cannot offset the emissions from making millions of new jackets every single year";
-const LEGAL = "The company settled a lawsuit over how it marketed recycled materials in its outdoor clothing line";
+import {
+  htmlToText, isSafeUrl, parseBrandInput, readPage, guardChecks, verdictFor, CHECKS,
+  type Picked, type SourcePage, type CheckKey, type CheckResult, type Mark,
+} from "./brand.ts";
+import { verifyQuote, BANNED } from "./guard.ts";
 
 const page = (id: string, host: string, text: string): SourcePage => ({
   id,
   url: `https://${host}/${id}`,
   host,
   text: `Intro text here. ${text}. Closing text here.`,
-});
-const PAGES = [
-  page("S1", "brand.example", CLAIM),
-  page("S2", "news.example", BACKS),
-  page("S3", "ngo.example", PUSH),
-  page("S4", "brand.example", BACKS), // the brand's own host, but not listed in ownSites
-  page("S5", "law.example", LEGAL),
-];
-type Claim = Picked["claims"][number];
-const pick = (evidence: Claim["evidence"], over: Partial<Claim> = {}, ownSites = ["S1"]): Picked => ({
-  ownSites,
-  claims: [{ claim: "Repairs keep clothes in use", sourceId: "S1", quote: CLAIM, evidence, ...over }],
 });
 
 test("htmlToText drops scripts, styles, nav, footer and comments, and decodes entities", () => {
@@ -48,121 +34,108 @@ test("htmlToText stays fast on hostile HTML with unclosed tags and comments", ()
   assert.equal(htmlToText("<p>Kept text</p><script>var unclosed = 1"), "Kept text");
 });
 
-test("guardBrand keeps a real claim and its real evidence", () => {
-  const { claims, removed } = guardBrand(
-    pick([
-      { stance: "backs", sourceId: "S2", quote: BACKS },
-      { stance: "pushes_back", sourceId: "S3", quote: PUSH },
-    ]),
+const CERT = "The company has been a certified B Corporation since 2011 and was recertified with a score of 151.4 this year";
+const CLIMATE = "The brand publishes its full scope 1, 2 and 3 greenhouse gas emissions every year in its impact report";
+const RATING = "Our rating for the brand is Good, based on its use of lower impact materials and its supplier code of conduct";
+const LOW = "Our rating for the brand is Not Good Enough because it discloses almost nothing about its supply chain emissions";
+const WATCH = "The consumer authority found the sustainability claims on its website were vague and could mislead shoppers";
+const LEGAL = "The company settled a lawsuit over how it marketed recycled materials in its outdoor clothing line";
+
+const PAGES = [
+  page("S1", "brand.example", `${CERT}. ${CLIMATE}`), // the brand's own site
+  page("S2", "bcorp.example", CERT),
+  page("S3", "rater.example", `${RATING}. ${LOW}`),
+  page("S4", "regulator.example", WATCH),
+  page("S5", "shop.brand.example", RATING), // a subdomain of the brand's site
+  page("S6", "law.example", LEGAL),
+];
+type Raw = Picked["checks"][number]["findings"][number];
+const f = (sign: Raw["sign"], sourceId: string, quote: string, note = "A plain note."): Raw => ({ sign, sourceId, quote, note });
+const pick = (checks: Partial<Record<CheckKey, Raw[]>>, ownSites = ["S1"]): Picked => ({
+  ownSites,
+  checks: Object.entries(checks).map(([check, findings]) => ({ check: check as CheckKey, findings: findings! })),
+});
+const marks = (r: { checks: CheckResult[] }) => Object.fromEntries(r.checks.map((c) => [c.check, c.mark]));
+
+test("guardChecks keeps verified findings and marks every check, in order", () => {
+  const r = guardChecks(
+    pick({
+      certifications: [f("good", "S2", CERT)],
+      climate: [f("good", "S1", CLIMATE)],
+      ratings: [f("good", "S3", RATING), f("red", "S3", LOW)],
+      watchdogs: [f("red", "S4", WATCH)],
+    }),
     PAGES,
   );
-  assert.deepEqual(removed, { mismatch: 0, wrongSite: 0, banned: 0 });
-  assert.equal(claims.length, 1);
-  assert.equal(claims[0].url, "https://brand.example/S1");
-  assert.equal(claims[0].host, "brand.example");
-  assert.deepEqual(
-    claims[0].evidence.map((e) => [e.stance, e.host]),
-    [
-      ["backs", "news.example"],
-      ["pushes_back", "ngo.example"],
+  assert.deepEqual(r.checks.map((c) => c.check), [...CHECKS]);
+  assert.deepEqual(marks(r), { certifications: "good", climate: "good", ratings: "both", watchdogs: "red" });
+  assert.deepEqual(r.removed, { mismatch: 0, wrongSite: 0, banned: 0 });
+  assert.equal(r.checks[1].signals[0].own, true);
+  assert.equal(r.checks[0].signals[0].own, false);
+  assert.equal(r.checks[0].signals[0].url, "https://bcorp.example/S2");
+});
+
+test("a check with no surviving quote is not found", () => {
+  const r = guardChecks(pick({ certifications: [f("good", "S2", CERT.replace("151.4", "160"))] }), PAGES);
+  assert.deepEqual(marks(r), { certifications: "not_found", climate: "not_found", ratings: "not_found", watchdogs: "not_found" });
+  assert.equal(r.removed.mismatch, 1);
+});
+
+test("the brand can't vouch for its own certification or rating, subdomains included", () => {
+  const r = guardChecks(pick({ certifications: [f("good", "S1", CERT)], ratings: [f("good", "S5", RATING)] }), PAGES);
+  assert.equal(marks(r).certifications, "not_found");
+  assert.equal(marks(r).ratings, "not_found");
+  assert.equal(r.removed.wrongSite, 2);
+});
+
+test("the brand's own site can back climate action and can show a red flag", () => {
+  const r = guardChecks(pick({ climate: [f("good", "S1", CLIMATE)], certifications: [f("red", "S1", CERT)] }), PAGES);
+  assert.equal(marks(r).climate, "good");
+  assert.equal(marks(r).certifications, "red");
+  assert.equal(r.removed.wrongSite, 0);
+});
+
+test("missing source ids and banned words are dropped", () => {
+  const r = guardChecks(pick({ watchdogs: [f("red", "S9", WATCH), f("red", "S6", LEGAL)] }), PAGES);
+  assert.equal(marks(r).watchdogs, "not_found");
+  assert.deepEqual(r.removed, { mismatch: 1, wrongSite: 0, banned: 1 });
+});
+
+test("sloppy source ids still match", () => {
+  const r = guardChecks(pick({ certifications: [f("good", " S2 ", CERT)], climate: [f("good", "[S1]", CLIMATE)] }, ["s1"]), PAGES);
+  assert.equal(marks(r).certifications, "good");
+  assert.equal(marks(r).climate, "good");
+  assert.equal(r.checks[1].signals[0].own, true);
+});
+
+test("at most 2 findings per check, first entry wins for a repeated check, notes softened", () => {
+  const picked: Picked = {
+    ownSites: ["S1"],
+    checks: [
+      { check: "ratings", findings: [f("good", "S3", RATING, "This is illegal."), f("good", "S3", RATING), f("red", "S3", LOW)] },
+      { check: "ratings", findings: [f("red", "S3", LOW)] },
     ],
-  );
+  };
+  const r = guardChecks(picked, PAGES);
+  assert.equal(r.checks[2].signals.length, 2);
+  assert.equal(marks(r).ratings, "good");
+  assert.equal(BANNED.test(r.checks[2].signals[0].note), false);
 });
 
-test("guardBrand drops a claim quote with one word changed, evidence and all", () => {
-  const { claims, removed } = guardBrand(
-    pick([{ stance: "backs", sourceId: "S2", quote: BACKS }], { quote: CLAIM.replace("repair", "recycle") }),
-    PAGES,
-  );
-  assert.equal(claims.length, 0);
-  assert.deepEqual(removed, { mismatch: 1, wrongSite: 0, banned: 0 });
-});
+const mk = (...ms: Mark[]): CheckResult[] => ms.map((mark, i) => ({ check: CHECKS[i], mark, signals: [] }));
 
-test("guardBrand drops evidence that cites a source id that doesn't exist", () => {
-  const { claims, removed } = guardBrand(pick([{ stance: "backs", sourceId: "S9", quote: BACKS }]), PAGES);
-  assert.equal(claims[0].evidence.length, 0);
-  assert.equal(removed.mismatch, 1);
-});
-
-test("guardBrand drops evidence from the brand's own sites and claims from other sites", () => {
-  const own = guardBrand(
-    pick([
-      { stance: "backs", sourceId: "S1", quote: CLAIM }, // listed in ownSites
-      { stance: "backs", sourceId: "S4", quote: BACKS }, // same host as the claim
-    ]),
-    PAGES,
-  );
-  assert.equal(own.claims[0].evidence.length, 0);
-  assert.equal(own.removed.wrongSite, 2);
-  const notTheirs = guardBrand(pick([], { sourceId: "S2", quote: BACKS }), PAGES);
-  assert.equal(notTheirs.claims.length, 0);
-  assert.equal(notTheirs.removed.wrongSite, 1);
-});
-
-test("guardBrand drops evidence from any host the brand owns, subdomains included", () => {
-  const pages = [
-    page("S1", "brand.example", CLAIM),
-    page("S2", "brandgroup.example", PUSH),
-    page("S3", "brandgroup.example", BACKS), // a brand host, but this page isn't listed in ownSites
-    page("S4", "eu.brand.example", BACKS),
-  ];
-  const { claims, removed } = guardBrand(
-    pick(
-      [
-        { stance: "backs", sourceId: "S3", quote: BACKS },
-        { stance: "backs", sourceId: "S4", quote: BACKS },
-      ],
-      {},
-      ["S1", "S2"],
-    ),
-    pages,
-  );
-  assert.equal(claims[0].evidence.length, 0);
-  assert.equal(removed.wrongSite, 2);
-});
-
-test("guardBrand drops quotes that use a banned word", () => {
-  const { claims, removed } = guardBrand(pick([{ stance: "pushes_back", sourceId: "S5", quote: LEGAL }]), PAGES);
-  assert.equal(claims[0].evidence.length, 0);
-  assert.equal(removed.banned, 1);
-});
-
-test("guardBrand softens a banned word in the claim label and drops a source whose host shows one", () => {
-  const pages = [...PAGES, page("S6", "green-lawsuits.example", BACKS)];
-  const { claims, removed } = guardBrand(
-    pick([{ stance: "backs", sourceId: "S6", quote: BACKS }], { claim: "Repairs avoid a lawsuit over waste" }),
-    pages,
-  );
-  assert.equal(claims[0].claim, "Repairs avoid a dispute over waste");
-  assert.equal(claims[0].evidence.length, 0);
-  assert.equal(removed.banned, 1);
-});
-
-test("guardBrand accepts sloppy source ids", () => {
-  const { claims } = guardBrand(
-    pick([{ stance: "backs", sourceId: " S2 ", quote: BACKS }], { sourceId: "[S1]" }, ["s1"]),
-    PAGES,
-  );
-  assert.equal(claims.length, 1);
-  assert.equal(claims[0].evidence.length, 1);
-});
-
-test("guardBrand returns nothing when no source belongs to the brand", () => {
-  const { claims, removed } = guardBrand(pick([{ stance: "backs", sourceId: "S2", quote: BACKS }], {}, []), PAGES);
-  assert.equal(claims.length, 0);
-  assert.equal(removed.wrongSite, 1);
-});
-
-test("guardBrand keeps at most 3 claims and 2 evidence items each", () => {
-  const ev = [
-    { stance: "backs" as const, sourceId: "S2", quote: BACKS },
-    { stance: "pushes_back" as const, sourceId: "S3", quote: PUSH },
-    { stance: "backs" as const, sourceId: "S2", quote: BACKS },
-  ];
-  const one = pick(ev).claims[0];
-  const { claims } = guardBrand({ ownSites: ["S1"], claims: [one, one, one, one] }, PAGES);
-  assert.equal(claims.length, 3);
-  assert.equal(claims[0].evidence.length, 2);
+test("verdictFor follows the rule on every branch", () => {
+  const v = (...ms: Mark[]) => verdictFor(mk(...ms)).verdict;
+  assert.equal(v("good", "not_found", "not_found", "not_found"), "not_enough");
+  assert.equal(v("not_found", "not_found", "not_found", "not_found"), "not_enough");
+  assert.equal(v("good", "good", "good", "not_found"), "strong");
+  assert.equal(v("good", "good", "good", "both"), "mixed");
+  assert.equal(v("good", "good", "red", "not_found"), "mixed");
+  assert.equal(v("good", "good", "not_found", "not_found"), "mixed");
+  assert.equal(v("both", "good", "not_found", "not_found"), "mixed");
+  assert.equal(v("good", "red", "not_found", "not_found"), "red_flags");
+  assert.equal(v("red", "red", "not_found", "not_found"), "red_flags");
+  assert.deepEqual(verdictFor(mk("good", "good", "red", "both")), { verdict: "mixed", good: 2, red: 1 });
 });
 
 test("isSafeUrl allows public web pages and refuses everything else", () => {
