@@ -1,7 +1,7 @@
 // Saves a real brand check for the sample chips so brand mode works with no API key.
 // Run: node --env-file=.env.local scripts/seed-brands.ts
 import fs from "node:fs";
-import { checkBrand, parseBrandInput } from "../lib/brand.ts";
+import { checkBrand, parseBrandInput, verdictFor } from "../lib/brand.ts";
 import { MODEL } from "../lib/check.ts";
 
 const SAMPLES = ["Patagonia", "H&M"];
@@ -9,8 +9,8 @@ const SAMPLES = ["Patagonia", "H&M"];
 const brands: Record<string, unknown> = {};
 for (const name of SAMPLES) {
   const r = await checkBrand(parseBrandInput(name)!);
-  const evidence = r.claims.reduce((n, c) => n + c.evidence.length, 0);
-  console.log(`${name}: read ${r.pagesRead}/${r.pagesFound} pages, ${r.claims.length} claims, ${evidence} evidence, removed`, r.removed);
+  const { verdict } = verdictFor(r.checks);
+  console.log(`${name}: read ${r.pagesRead}/${r.pagesFound} pages, verdict ${verdict},`, r.checks.map((c) => `${c.check}=${c.mark}(${c.signals.length})`).join(" "), "removed", r.removed);
   brands[name] = r;
 }
 fs.writeFileSync(
