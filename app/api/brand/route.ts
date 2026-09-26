@@ -6,7 +6,7 @@ import { checkBrand, parseBrandInput, verdictFor, type BrandCheck } from "@/lib/
 const Body = z.object({ brand: z.string().trim().min(2).max(300) });
 
 const samples = fixtures.brands as unknown as Record<string, BrandCheck>;
-const NONE = { mismatch: 0, wrongSite: 0, banned: 0 };
+const NONE = { mismatch: 0, offCheck: 0, wrongSite: 0, banned: 0 };
 
 const reply = (data: object, status = 200) =>
   Response.json({ model: MODEL, checks: [], removed: 0, removedWhy: NONE, pagesFound: 0, pagesRead: 0, ...data }, { status });
@@ -36,13 +36,13 @@ export async function POST(req: Request) {
     if (!raw.pagesRead) {
       return reply({ ...found, error: `Couldn't find enough about ${raw.brand} to check. Try a link to its site.` });
     }
-    const { mismatch, wrongSite, banned } = raw.removed;
+    const { mismatch, offCheck, wrongSite, banned } = raw.removed;
     return reply({
       ...found,
       savedOn: source === "sample" ? fixtures.savedOn : undefined,
       ...verdictFor(raw.checks),
       checks: raw.checks,
-      removed: mismatch + wrongSite + banned,
+      removed: mismatch + offCheck + wrongSite + banned,
       removedWhy: raw.removed,
     });
   } catch (err) {

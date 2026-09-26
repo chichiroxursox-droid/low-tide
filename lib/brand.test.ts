@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
 import {
-  htmlToText, isSafeUrl, parseBrandInput, readPage, guardChecks, verdictFor, namesBrand, CHECKS,
+  htmlToText, isSafeUrl, parseBrandInput, readPage, guardChecks, verdictFor, namesBrand, hostNamesBrand, CHECKS,
   type Picked, type SourcePage, type CheckKey, type CheckResult, type Mark,
 } from "./brand.ts";
 import { verifyQuote, BANNED } from "./guard.ts";
@@ -55,67 +55,84 @@ const WATCH = "The consumer authority found the sustainability claims on its web
 const LEGAL = "The company settled a lawsuit over how it marketed recycled materials in its outdoor clothing line";
 
 const PAGES = [
-  page("S1", "brand.example", `${CERT}. ${CLIMATE}`), // the brand's own site
+  page("S1", "brand.example", `${CERT}. ${CLIMATE}. ${LOW}`), // the brand's own site
   page("S2", "bcorp.example", CERT),
   page("S3", "rater.example", `${RATING}. ${LOW}`),
   page("S4", "regulator.example", WATCH),
-  page("S5", "shop.brand.example", RATING), // a subdomain of the brand's site
+  page("S5", "shop.brand.example", RATING), // the brand's shop, a subdomain of its site
   page("S6", "law.example", LEGAL),
 ];
 type Raw = Picked["checks"][number]["findings"][number];
 const f = (sign: Raw["sign"], sourceId: string, quote: string, note = "A plain note."): Raw => ({ sign, sourceId, quote, note });
-const pick = (checks: Partial<Record<CheckKey, Raw[]>>, ownSites = ["S1"]): Picked => ({
-  ownSites,
+const pick = (checks: Partial<Record<CheckKey, Raw[]>>): Picked => ({
   checks: Object.entries(checks).map(([check, findings]) => ({ check: check as CheckKey, findings: findings! })),
 });
+const guard = (checks: Partial<Record<CheckKey, Raw[]>>) => guardChecks(pick(checks), PAGES, "Brand");
 const marks = (r: { checks: CheckResult[] }) => Object.fromEntries(r.checks.map((c) => [c.check, c.mark]));
 
+test("hostNamesBrand counts a site as the brand's own when its address names the brand", () => {
+  assert.equal(hostNamesBrand("hmgroup.com", "H&M"), true);
+  assert.equal(hostNamesBrand("www2.hm.com", "H&M"), true);
+  assert.equal(hostNamesBrand("chmod.com", "H&M"), false);
+  assert.equal(hostNamesBrand("patagoniaworks.com", "Patagonia"), true);
+  assert.equal(hostNamesBrand("bettertrail.com", "Patagonia"), false);
+  assert.equal(hostNamesBrand("directory.goodonyou.eco", "Patagonia"), false);
+  assert.equal(hostNamesBrand("thenorthface.com", "North Face"), true);
+  assert.equal(hostNamesBrand("allbirds.com.kw", "Allbirds"), true);
+  assert.equal(hostNamesBrand("llbean.com", "L.L.Bean"), true);
+});
+
 test("guardChecks keeps verified findings and marks every check, in order", () => {
-  const r = guardChecks(
-    pick({
-      certifications: [f("good", "S2", CERT)],
-      climate: [f("good", "S1", CLIMATE)],
-      ratings: [f("good", "S3", RATING), f("red", "S3", LOW)],
-      watchdogs: [f("red", "S4", WATCH)],
-    }),
-    PAGES,
-  );
+  const r = guard({
+    certifications: [f("good", "S2", CERT)],
+    climate: [f("good", "S1", CLIMATE)],
+    ratings: [f("good", "S3", RATING), f("red", "S3", LOW)],
+    watchdogs: [f("red", "S4", WATCH)],
+  });
   assert.deepEqual(r.checks.map((c) => c.check), [...CHECKS]);
   assert.deepEqual(marks(r), { certifications: "good", climate: "good", ratings: "both", watchdogs: "red" });
-  assert.deepEqual(r.removed, { mismatch: 0, wrongSite: 0, banned: 0 });
+  assert.deepEqual(r.removed, { mismatch: 0, offCheck: 0, wrongSite: 0, banned: 0 });
   assert.equal(r.checks[1].signals[0].own, true);
   assert.equal(r.checks[0].signals[0].own, false);
   assert.equal(r.checks[0].signals[0].url, "https://bcorp.example/S2");
 });
 
 test("a check with no surviving quote is not found", () => {
-  const r = guardChecks(pick({ certifications: [f("good", "S2", CERT.replace("151.4", "160"))] }), PAGES);
+  const r = guard({ certifications: [f("good", "S2", CERT.replace("151.4", "160"))] });
   assert.deepEqual(marks(r), { certifications: "not_found", climate: "not_found", ratings: "not_found", watchdogs: "not_found" });
   assert.equal(r.removed.mismatch, 1);
 });
 
+test("certifications only count for the brand, watchdog findings only against it", () => {
+  const r = guard({ certifications: [f("red", "S2", CERT)], watchdogs: [f("good", "S4", WATCH)] });
+  assert.equal(marks(r).certifications, "not_found");
+  assert.equal(marks(r).watchdogs, "not_found");
+  assert.equal(r.removed.offCheck, 2);
+});
+
 test("the brand can't vouch for its own certification or rating, subdomains included", () => {
-  const r = guardChecks(pick({ certifications: [f("good", "S1", CERT)], ratings: [f("good", "S5", RATING)] }), PAGES);
+  const r = guard({ certifications: [f("good", "S1", CERT)], ratings: [f("good", "S5", RATING)] });
   assert.equal(marks(r).certifications, "not_found");
   assert.equal(marks(r).ratings, "not_found");
   assert.equal(r.removed.wrongSite, 2);
 });
 
-test("the brand's own site can back climate action and can show a red flag", () => {
-  const r = guardChecks(pick({ climate: [f("good", "S1", CLIMATE)], certifications: [f("red", "S1", CERT)] }), PAGES);
+test("the brand's own site can back climate action and can show a red rating", () => {
+  const r = guard({ climate: [f("good", "S1", CLIMATE)], ratings: [f("red", "S1", LOW)] });
   assert.equal(marks(r).climate, "good");
-  assert.equal(marks(r).certifications, "red");
+  assert.equal(marks(r).ratings, "red");
+  assert.equal(r.checks[2].signals[0].own, true);
   assert.equal(r.removed.wrongSite, 0);
 });
 
 test("missing source ids and banned words are dropped", () => {
-  const r = guardChecks(pick({ watchdogs: [f("red", "S9", WATCH), f("red", "S6", LEGAL)] }), PAGES);
+  const r = guard({ watchdogs: [f("red", "S9", WATCH), f("red", "S6", LEGAL)] });
   assert.equal(marks(r).watchdogs, "not_found");
-  assert.deepEqual(r.removed, { mismatch: 1, wrongSite: 0, banned: 1 });
+  assert.deepEqual(r.removed, { mismatch: 1, offCheck: 0, wrongSite: 0, banned: 1 });
 });
 
 test("sloppy source ids still match", () => {
-  const r = guardChecks(pick({ certifications: [f("good", " S2 ", CERT)], climate: [f("good", "[S1]", CLIMATE)] }, ["s1"]), PAGES);
+  const r = guard({ certifications: [f("good", " S2 ", CERT)], climate: [f("good", "[S1]", CLIMATE)] });
   assert.equal(marks(r).certifications, "good");
   assert.equal(marks(r).climate, "good");
   assert.equal(r.checks[1].signals[0].own, true);
@@ -123,13 +140,12 @@ test("sloppy source ids still match", () => {
 
 test("at most 2 findings per check, first entry wins for a repeated check, notes softened", () => {
   const picked: Picked = {
-    ownSites: ["S1"],
     checks: [
       { check: "ratings", findings: [f("good", "S3", RATING, "This is illegal."), f("good", "S3", RATING), f("red", "S3", LOW)] },
       { check: "ratings", findings: [f("red", "S3", LOW)] },
     ],
   };
-  const r = guardChecks(picked, PAGES);
+  const r = guardChecks(picked, PAGES, "Brand");
   assert.equal(r.checks[2].signals.length, 2);
   assert.equal(marks(r).ratings, "good");
   assert.equal(BANNED.test(r.checks[2].signals[0].note), false);

@@ -12,12 +12,11 @@ export type Sign = "good" | "red";
 export type Mark = "good" | "red" | "both" | "not_found";
 export type Verdict = "strong" | "mixed" | "red_flags" | "not_enough";
 export type Picked = {
-  ownSites: string[];
   checks: { check: CheckKey; findings: { sign: Sign; sourceId: string; quote: string; note: string }[] }[];
 };
 export type Signal = { sign: Sign; quote: string; note: string; url: string; host: string; own: boolean };
 export type CheckResult = { check: CheckKey; mark: Mark; signals: Signal[] };
-export type Removed = { mismatch: number; wrongSite: number; banned: number };
+export type Removed = { mismatch: number; offCheck: number; wrongSite: number; banned: number };
 export type BrandCheck = { brand: string; pagesFound: number; pagesRead: number; checks: CheckResult[]; removed: Removed };
 export type BrandInput = { name: string; url?: URL };
 
@@ -124,17 +123,15 @@ export async function readPage(url: string): Promise<Page | null> {
 
 const sid = (s: string) => s.match(/S\d+/i)?.[0].toUpperCase() ?? "";
 
+// Certifications only ever count for a brand (holding none is not a finding), watchdog findings only against it.
+const SIGNS: Record<CheckKey, Sign[]> = { certifications: ["good"], climate: ["good", "red"], ratings: ["good", "red"], watchdogs: ["red"] };
 // A brand can't vouch for itself on these: a good sign has to come from a site it doesn't own.
 const INDEPENDENT_GOOD: CheckKey[] = ["certifications", "ratings"];
 
 // Keeps only findings whose quote is really on the page they cite, then marks each of the four checks.
-export function guardChecks(picked: Picked, pages: SourcePage[]): { checks: CheckResult[]; removed: Removed } {
+export function guardChecks(picked: Picked, pages: SourcePage[], brand: string): { checks: CheckResult[]; removed: Removed } {
   const byId = new Map(pages.map((p) => [p.id, p]));
-  const own = new Set(picked.ownSites.map(sid));
-  // ponytail: exact host or subdomain of a brand-owned page. A sibling domain only counts if the model lists it.
-  const ownHosts = pages.filter((p) => own.has(p.id)).map((p) => p.host);
-  const isOwn = (p: SourcePage) => own.has(p.id) || ownHosts.some((h) => p.host === h || p.host.endsWith(`.${h}`));
-  const removed: Removed = { mismatch: 0, wrongSite: 0, banned: 0 };
+  const removed: Removed = { mismatch: 0, offCheck: 0, wrongSite: 0, banned: 0 };
 
   const checks = CHECKS.map((check): CheckResult => {
     const signals: Signal[] = [];
@@ -144,7 +141,11 @@ export function guardChecks(picked: Picked, pages: SourcePage[]): { checks: Chec
         removed.mismatch++;
         continue;
       }
-      const mine = isOwn(page);
+      if (!SIGNS[check].includes(f.sign)) {
+        removed.offCheck++;
+        continue;
+      }
+      const mine = hostNamesBrand(page.host, brand);
       if (mine && f.sign === "good" && INDEPENDENT_GOOD.includes(check)) {
         removed.wrongSite++;
         continue;
@@ -209,7 +210,6 @@ export async function findSources(brand: string): Promise<string[]> {
 
 const quoteField = z.string().describe("One continuous passage of 10 to 40 words, copied character for character from that source");
 const pickSchema = z.object({
-  ownSites: z.array(z.string()).describe('Ids like "S1" of every source that belongs to the brand itself'),
   checks: z.array(
     z.object({
       check: z.enum(CHECKS),
@@ -227,12 +227,11 @@ const pickSchema = z.object({
 
 const PICK_SYSTEM = `You check whether a brand's sustainability holds up, for a shopper deciding whether to buy from it. You get numbered source pages (S1, S2, ...). Use only what these pages say. Every finding must be about the brand named in the prompt: a passage about another company, or about the topic in general, is not a finding.
 
-ownSites: the ids of every source that belongs to the brand itself: its main site, group or corporate site, regional sites, and its own reports.
 checks: one entry for each check below that at least one source speaks to, with up to 2 findings each.
-- certifications: third-party sustainability certifications the brand holds (B Corp, Fair Trade, bluesign, FSC, Cradle to Cradle, GOTS). good if a source confirms a current certification; red if one was lost, suspended, or refused. Not holding a certification is not a finding.
+- certifications: third-party sustainability certifications the brand holds (B Corp, Fair Trade, bluesign, FSC, Cradle to Cradle, GOTS). Only good findings: a source confirming a current certification. Not holding a certification is not a finding.
 - climate: good if a source shows a climate target validated by the Science Based Targets initiative, or published greenhouse gas emissions; red if a source reports targets missed or dropped, or emissions rising.
 - ratings: independent sustainability ratings (Good On You, CDP, Fashion Transparency Index, or similar). good for a high rating, red for a low one. Quote the passage that states the rating.
-- watchdogs: red if a regulator, consumer authority, or watchdog group acted on or criticized the brand's environmental claims; good only if one explicitly cleared them.
+- watchdogs: red if a regulator, consumer authority, or watchdog group acted on or criticized the brand's environmental claims. Only red findings.
 Each finding: its sign, the id of the source, a quote, and a note. The quote is one continuous passage of 10 to 40 words copied character for character from that source: no ellipses, no paraphrase, no stitching sentences together. The note is one plain sentence a shopper can follow.
 Only include a finding when the quoted passage itself shows it. The absence of news is not a finding. Never use the words illegal, violation, or lawsuit.`;
 
@@ -261,6 +260,21 @@ export function namesBrand(text: string, brand: string): boolean {
   return name.trim() !== "" && words(text).includes(name);
 }
 
+// A site is the brand's own when a label of its address contains the brand's name ("patagoniaworks.com",
+// "allbirds.com.kw"). Short names ("H&M" is "hm") must start a label, so "chmod.com" doesn't count.
+// ponytail: a parent company's site (unilever.com for Dove) is not recognized; that needs an ownership list.
+export function hostNamesBrand(host: string, brand: string): boolean {
+  const key = words(brand.replace(SUFFIXES, "")).replace(/[^a-z0-9]/g, "");
+  if (!key) return false;
+  return host
+    .toLowerCase()
+    .split(".")
+    .some((label) => {
+      const l = label.replace(/-/g, "");
+      return key.length < 4 ? l.startsWith(key) : l.includes(key);
+    });
+}
+
 // The whole brand check. The verdict is left to verdictFor, which the route runs at serve time.
 export async function checkBrand(input: BrandInput): Promise<BrandCheck> {
   const [first, found] = await Promise.all([input.url ? readPage(input.url.href) : null, findSources(input.name)]);
@@ -273,6 +287,6 @@ export async function checkBrand(input: BrandInput): Promise<BrandCheck> {
     .filter((p, i, all) => all.findIndex((q) => q.url === p.url) === i)
     .map((p, i) => ({ ...p, id: `S${i + 1}` }));
   const base = { brand: input.name, pagesFound: found.length + (input.url ? 1 : 0), pagesRead: pages.length };
-  if (!pages.length) return { ...base, ...guardChecks({ ownSites: [], checks: [] }, []) };
-  return { ...base, ...guardChecks(await pickQuotes(input.name, pages), pages) };
+  if (!pages.length) return { ...base, ...guardChecks({ checks: [] }, [], name) };
+  return { ...base, ...guardChecks(await pickQuotes(input.name, pages), pages, name) };
 }
