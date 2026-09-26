@@ -56,3 +56,12 @@ Bell was Sat Sept 26 10:00am EDT. If a milestone runs 90 min late, take the next
 - Notes: design uses tidal flat #E7ECE8, deep channel #12343B, buoy #E8B04B, sea glass #9CCBB8, sun #F7E49A; Schibsted Grotesk for UI and Newsreader for Guides text. The Guides passages keep their own em dashes because they are verbatim government text, and our UI copy has none
 - Next step: M5, prove the offline path on prod with the key removed, then restore it
 - Scope cuts so far: none
+
+### Sat 12:33pm, M5
+- Milestone: hit, about 7.5 hours ahead of the 8:00pm target. Dependency freeze from here on (only the kit's stack: next, react, ai, @ai-sdk/google, zod, tailwind)
+- Prod URL works: yes. Offline proof: removed `GOOGLE_GENERATIVE_AI_API_KEY` from Vercel production and redeployed. On prod, all 4 samples returned their saved answers through the guard, the tamper test still dropped the edited quote, and the live claim showed "Live checks are offline right now. The sample claims still work." with a 200, not a 500. Restored the key, redeployed, and the live claim was answered by Gemini again in 1.8s
+- Tests pass: yes, 7/7
+- What broke: nothing
+- Notes: the intro now names Gemini 2.5 Flash as the reader and Low Tide as the quote checker. Each result says "Checked live by Gemini 2.5 Flash" or "Saved answer from Gemini 2.5 Flash, so this sample works offline."
+- Next step: M6, a scripted headless Playwright recording of the demo path on prod, converted to H.264 under 90s at ~/Desktop/low-tide-demo.mp4
+- Scope cuts so far: none
