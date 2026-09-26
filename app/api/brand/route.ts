@@ -41,6 +41,7 @@ export async function POST(req: Request) {
 
     let guidesRemoved = 0;
     const claims = raw.claims.map((c) => {
+      if (!c.findings) return c;
       const { findings, removed } = guardFindings(c.findings, guides);
       guidesRemoved += removed;
       return { ...c, findings: present(findings, guides) };

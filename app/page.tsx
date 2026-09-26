@@ -30,7 +30,7 @@ type BrandCard = {
   url: string;
   host: string;
   evidence: { stance: Stance; quote: string; url: string; host: string }[];
-  findings: Shown[];
+  findings: Shown[] | null; // null: the Guides reading didn't come back
 };
 type BrandResult = {
   brand: string;
@@ -178,13 +178,13 @@ function BrandClaimCard({ c }: { c: BrandCard }) {
           <span className="text-deep/65">Quote checked word for word against their page</span>
         </figcaption>
       </figure>
-      {c.findings.length > 0 && (
-        <>
-          <Label>Green Guides reading</Label>
-          {c.findings.map((f) => (
-            <FindingCard key={`${f.phrase}-${f.section}`} f={f} />
-          ))}
-        </>
+      <Label>Green Guides reading</Label>
+      {c.findings === null ? (
+        <p className="mt-3 max-w-[65ch] text-deep/70">The Guides reading didn&rsquo;t come back for this quote. Try again later.</p>
+      ) : c.findings.length ? (
+        c.findings.map((f) => <FindingCard key={`${f.phrase}-${f.section}`} f={f} />)
+      ) : (
+        <p className="mt-3 max-w-[65ch] text-deep/70">No verified Guides finding for this quote.</p>
       )}
       <Label>Others say</Label>
       {c.evidence.length ? (

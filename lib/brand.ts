@@ -18,7 +18,7 @@ export type BrandCheck = {
   brand: string;
   pagesFound: number;
   pagesRead: number;
-  claims: (BrandClaim & { findings: Finding[] })[];
+  claims: (BrandClaim & { findings: Finding[] | null })[]; // null: the Guides call failed
   removed: Removed;
 };
 export type BrandInput = { name: string; url?: URL };
@@ -235,9 +235,10 @@ export async function checkBrand(input: BrandInput): Promise<BrandCheck> {
   if (!pages.length) return { ...base, claims: [], removed: { ...NONE } };
 
   const { claims, removed } = guardBrand(await pickQuotes(input.name, pages), pages);
-  // ponytail: a failed Guides call leaves that card without a Guides reading instead of failing the whole check.
+  // A failed Guides call marks that card's reading as missing (null) instead of failing the whole check,
+  // so the page can tell it apart from a quote with nothing the Guides cover ([]).
   const withGuides = await Promise.all(
-    claims.map(async (c) => ({ ...c, findings: await askGemini(c.quote).catch((): Finding[] => []) })),
+    claims.map(async (c) => ({ ...c, findings: await askGemini(c.quote).catch(() => null) })),
   );
   return { ...base, claims: withGuides, removed };
 }
