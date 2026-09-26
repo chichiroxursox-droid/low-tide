@@ -22,6 +22,12 @@ test("namesBrand finds the brand as whole words, however the page spells the pun
   assert.equal(namesBrand("L.L.Bean boots", "L.L.Bean"), true);
   assert.equal(namesBrand("Levi Strauss set a science based target", "Levi Strauss & Co."), true);
   assert.equal(namesBrand("An op-ed on packaging", "Co-op"), false);
+  assert.equal(namesBrand("Marks and Spencer set a target", "Marks & Spencer"), true);
+  assert.equal(namesBrand("Ben and Jerry's said on Monday", "Ben & Jerry's"), true);
+  // A link's name is squashed ("hm", "thenorthface"); the page spells it with spaces.
+  assert.equal(namesBrand("H&M reported its emissions", "hm"), true);
+  assert.equal(namesBrand("The North Face jacket", "thenorthface"), true);
+  assert.equal(namesBrand("Ben & Jerry's ice cream", "benjerry"), true);
   assert.equal(namesBrand("SEC charges QZ Asset Management with misleading claims", "Zqxv Widget Company"), false);
   assert.equal(namesBrand("an ohm meter reading", "HM"), false);
 });
@@ -90,6 +96,10 @@ test("hostNamesBrand counts a site as the brand's own when its address names the
   assert.equal(hostNamesBrand("msci.com", "M&S"), false);
   assert.equal(hostNamesBrand("sciencebasedtargets.org", "Target"), false);
   assert.equal(hostNamesBrand("stanford.edu", "Ford"), false);
+  assert.equal(hostNamesBrand("levi.com", "Levi's"), true);
+  assert.equal(hostNamesBrand("benjerry.com", "Ben & Jerry's"), true);
+  assert.equal(hostNamesBrand("marksandspencer.com", "Marks & Spencer"), true);
+  assert.equal(hostNamesBrand("handmade.com", "H&M"), false);
   assert.equal(hostNamesBrand("coop.co.uk", "Co-op"), true);
   assert.equal(hostNamesBrand("openai.com", "Co-op"), false);
 });

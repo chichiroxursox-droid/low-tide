@@ -254,23 +254,46 @@ const CORP = "inc|co|company|corp|corporation|ltd|llc|plc|group|gmbh";
 // A company word at the end of the name only, with the "&" or comma before it: "Levi Strauss & Co." but not "Co-op".
 const SUFFIXES = new RegExp(`[\\s,&]*\\b(${CORP})\\b\\.?$`, "i");
 // Lowercased words, accents and punctuation stripped. "&" stays a word of its own, so "H&M" and "H & M" match.
-const words = (s: string) => ` ${s.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().replace(/&/g, " & ").replace(/[^a-z0-9&]+/g, " ").trim()} `;
+const words = (s: string) =>
+  s.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().replace(/&/g, " & ").replace(/[^a-z0-9&]+/g, " ").trim().split(" ").filter(Boolean);
 
-// ponytail: whole-word match anywhere on the page, so a name that is also a common word ("Gap") passes most pages;
-// the pick prompt still asks for passages about the brand itself.
+// The brand's name with the spaces squeezed out, in each spelling a page or an address may use: "&" as "and" or left
+// out, and a possessive "'s" kept or dropped. "Ben & Jerry's" is benandjerrys, benjerrys, benandjerry or benjerry.
+function keys(brand: string): string[] {
+  const name = brand.replace(SUFFIXES, "");
+  const squashed = [name, name.replace(/['’]s$/i, "")].map((n) => words(n).join(""));
+  return [...new Set(squashed.flatMap((k) => [k.replace(/&/g, "and"), k.replace(/&/g, "")]))].filter(Boolean);
+}
+
+// Whole words anywhere on the page, read with the spaces between them squeezed out, so "The North Face" names a
+// link's "thenorthface" and "Marks and Spencer" names "Marks & Spencer".
+// ponytail: a name that is also a common word ("Gap") passes most pages; the pick prompt still asks for passages
+// about the brand itself.
 export function namesBrand(text: string, brand: string): boolean {
-  const name = words(brand.replace(SUFFIXES, ""));
-  return name.trim() !== "" && words(text).includes(name);
+  const ks = keys(brand);
+  const longest = Math.max(0, ...ks.map((k) => k.length));
+  const t = words(text);
+  return ["and", ""].some((amp) =>
+    t.some((_, i) => {
+      for (let j = i, run = ""; j < t.length && run.length < longest; j++) {
+        run += t[j] === "&" ? amp : t[j];
+        if (ks.includes(run)) return true;
+      }
+      return false;
+    }),
+  );
 }
 
 // A site is the brand's own when a label of its address starts with the brand's name ("patagoniaworks.com",
-// "allbirds.com.kw"), "the" or "about" allowed in front ("thenorthface.com", "aboutamazon.com"). A name under
-// 4 letters must be the whole label, a company word aside ("hmgroup.com"), so "hmrc.gov.uk" and "msci.com" don't count.
+// "allbirds.com.kw", "levi.com" for "Levi's"), "the" or "about" allowed in front ("thenorthface.com",
+// "aboutamazon.com"). A name under 4 letters must be the whole label, a company word aside ("hmgroup.com"), so
+// "hmrc.gov.uk", "msci.com" and "handmade.com" don't count.
 // ponytail: a parent company's site (unilever.com for Dove) is not recognized; that needs an ownership list.
 export function hostNamesBrand(host: string, brand: string): boolean {
-  const key = words(brand.replace(SUFFIXES, "")).replace(/[^a-z0-9]/g, "");
-  if (!key) return false;
-  const own = new RegExp(key.length < 4 ? `^${key}(${CORP})?$` : `^(the|about)?${key}`);
+  const ks = keys(brand);
+  if (!ks.length) return false;
+  const any = ks.join("|");
+  const own = new RegExp(ks.some((k) => k.length < 4) ? `^(${any})(${CORP})?$` : `^(the|about)?(${any})`);
   return host
     .toLowerCase()
     .split(".")

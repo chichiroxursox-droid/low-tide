@@ -37,7 +37,7 @@ input (name or link, unchanged)
 
 Revised after the first build (a made-up brand got "Mixed record" from generic pages about other companies, and Gemini marked "not a B Corp" red and called a review blog Patagonia's own site). Rules that were prompts are now code:
 
-- Before the pick call, a downloaded page that never names the brand (`namesBrand`, whole words, "&" and accents normalized) is dropped. The pasted link is exempt. A made-up brand ends with 0 pages read and "Couldn't find enough".
+- Before the pick call, a downloaded page that never names the brand (`namesBrand`, whole words read with the spaces squeezed out, "&" as "and" or left out, a possessive "'s" optional, accents stripped) is dropped. The pasted link is exempt. A made-up brand ends with 0 pages read and "Couldn't find enough".
 - A finding is kept only if its source exists and `verifyQuote(quote, page.text)` passes (else `mismatch`).
 - Signs per check: certifications only `good`, watchdogs only `red`, climate and ratings either. Anything else is dropped (`offCheck`, shown as "didn't fit its check").
 - A page is the brand's own when a label of its host starts with the brand's name, "the" or "about" allowed in front (`hostNamesBrand`; a name under 4 characters must be the whole label, a company word like "group" aside, so `hmrc.gov.uk` isn't H&M's). For a link, the name is the label its site is registered under (`ruleName`: `www2.hm.com` is "hm"). Gemini no longer lists own sites. A parent company's site is not recognized (README limitation).
