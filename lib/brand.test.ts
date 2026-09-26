@@ -41,6 +41,13 @@ test("htmlToText drops scripts, styles, nav, footer and comments, and decodes en
   assert.equal(verifyQuote("We’re cutting emissions & waste across every store we run, starting this year", text), true);
 });
 
+test("htmlToText stays fast on hostile HTML with unclosed tags and comments", () => {
+  const start = performance.now();
+  for (const hostile of ["<".repeat(60_000), "<nav x".repeat(20_000), "<!--".repeat(25_000)]) htmlToText(hostile);
+  assert.ok(performance.now() - start < 500, `took ${Math.round(performance.now() - start)} ms`);
+  assert.equal(htmlToText("<p>Kept text</p><script>var unclosed = 1"), "Kept text");
+});
+
 test("guardBrand keeps a real claim and its real evidence", () => {
   const { claims, removed } = guardBrand(
     pick([

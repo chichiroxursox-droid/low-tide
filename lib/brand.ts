@@ -29,11 +29,13 @@ const ENTITIES: Record<string, string> = {
 };
 
 // Plain text of a page, close enough to what a reader sees that a copied sentence is a substring of it.
+// Every pattern runs in linear time: an unclosed comment or element runs to the end of the page instead of
+// being retried from every later "<", which let a hostile 2 MB page hang the function for minutes.
 export function htmlToText(html: string): string {
   return html
-    .replace(/<!--[\s\S]*?-->/g, " ")
-    .replace(/<(script|style|noscript|svg|nav|footer|template)\b[\s\S]*?<\/\1\s*>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
+    .replace(/<!--[\s\S]*?(?:-->|$)/g, " ")
+    .replace(/<(script|style|noscript|svg|nav|footer|template)(?=[\s/>])[\s\S]*?(?:<\/\1\s*>|$)/gi, " ")
+    .replace(/<[^<>]*>/g, " ")
     .replace(/&(#x[\da-f]+|#\d+|[a-z]+);/gi, (m, e: string) => {
       if (e[0] !== "#") return ENTITIES[e.toLowerCase()] ?? m;
       const n = e[1] === "x" || e[1] === "X" ? parseInt(e.slice(2), 16) : Number(e.slice(1));
