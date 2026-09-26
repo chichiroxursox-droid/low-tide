@@ -1,17 +1,15 @@
 import { z } from "zod";
-import guides from "@/lib/guides.json";
 import fixtures from "@/fixtures/brands.json";
 import { MODEL } from "@/lib/check";
-import { checkBrand, parseBrandInput, type BrandCheck } from "@/lib/brand";
-import { guardFindings, present } from "@/lib/guard";
+import { checkBrand, parseBrandInput, verdictFor, type BrandCheck } from "@/lib/brand";
 
 const Body = z.object({ brand: z.string().trim().min(2).max(300) });
 
 const samples = fixtures.brands as unknown as Record<string, BrandCheck>;
-const NONE = { mismatch: 0, wrongSite: 0, banned: 0, guides: 0 };
+const NONE = { mismatch: 0, wrongSite: 0, banned: 0 };
 
 const reply = (data: object, status = 200) =>
-  Response.json({ model: MODEL, claims: [], removed: 0, removedWhy: NONE, pagesFound: 0, pagesRead: 0, ...data }, { status });
+  Response.json({ model: MODEL, checks: [], removed: 0, removedWhy: NONE, pagesFound: 0, pagesRead: 0, ...data }, { status });
 
 export async function POST(req: Request) {
   try {
@@ -35,24 +33,17 @@ export async function POST(req: Request) {
     }
 
     const found = { brand: raw.brand, source, pagesFound: raw.pagesFound, pagesRead: raw.pagesRead };
-    if (!raw.claims.length) {
-      return reply({ ...found, error: `Couldn't find enough about ${raw.brand} to check. Try a link to their sustainability page.` });
+    if (!raw.pagesRead) {
+      return reply({ ...found, error: `Couldn't find enough about ${raw.brand} to check. Try a link to its site.` });
     }
-
-    let guidesRemoved = 0;
-    const claims = raw.claims.map((c) => {
-      if (!c.findings) return c;
-      const { findings, removed } = guardFindings(c.findings, guides);
-      guidesRemoved += removed;
-      return { ...c, findings: present(findings, guides) };
-    });
-    const removedWhy = { ...raw.removed, guides: guidesRemoved };
+    const { mismatch, wrongSite, banned } = raw.removed;
     return reply({
       ...found,
       savedOn: source === "sample" ? fixtures.savedOn : undefined,
-      claims,
-      removed: removedWhy.mismatch + removedWhy.wrongSite + removedWhy.banned + removedWhy.guides,
-      removedWhy,
+      ...verdictFor(raw.checks),
+      checks: raw.checks,
+      removed: mismatch + wrongSite + banned,
+      removedWhy: raw.removed,
     });
   } catch (err) {
     console.error("brand check failed", err);

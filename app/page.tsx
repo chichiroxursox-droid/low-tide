@@ -23,20 +23,18 @@ const VERDICT = {
   not_covered: { label: "Not covered by the Guides", tone: "border border-dashed border-deep/50" },
 };
 
-type Stance = "backs" | "pushes_back";
-type BrandCard = {
-  claim: string;
-  quote: string;
-  url: string;
-  host: string;
-  evidence: { stance: Stance; quote: string; url: string; host: string }[];
-  findings: Shown[] | null; // null: the Guides reading didn't come back
-};
+type CheckKey = "certifications" | "climate" | "ratings" | "watchdogs";
+type Mark = "good" | "red" | "both" | "not_found";
+type Signal = { sign: "good" | "red"; quote: string; note: string; url: string; host: string; own: boolean };
+type Check = { check: CheckKey; mark: Mark; signals: Signal[] };
 type BrandResult = {
   brand: string;
-  claims: BrandCard[];
+  verdict?: "strong" | "mixed" | "red_flags" | "not_enough";
+  good?: number;
+  red?: number;
+  checks: Check[];
   removed: number;
-  removedWhy: { mismatch: number; wrongSite: number; banned: number; guides: number };
+  removedWhy: { mismatch: number; wrongSite: number; banned: number };
   pagesFound: number;
   pagesRead: number;
   source?: "sample" | "live";
@@ -47,21 +45,43 @@ type BrandResult = {
 
 const BRAND_SAMPLES = Object.keys(brandFixtures.brands);
 
-const STANCE = {
-  backs: { label: "Backs it up", tone: "bg-glass" },
-  pushes_back: { label: "Pushes back", tone: "bg-buoy" },
+const BRAND_VERDICT = {
+  strong: { label: "Strong record", tone: "bg-glass" },
+  mixed: { label: "Mixed record", tone: "bg-sun" },
+  red_flags: { label: "Red flags", tone: "bg-buoy" },
+  not_enough: { label: "Not enough evidence", tone: "border border-dashed border-deep/50" },
+};
+const CHECK_TITLE: Record<CheckKey, string> = {
+  certifications: "Certifications",
+  climate: "Climate action",
+  ratings: "Independent ratings",
+  watchdogs: "Regulator and watchdog findings",
+};
+const MARK: Record<Mark, { label: string; tone: string }> = {
+  good: { label: "Good sign", tone: "bg-glass" },
+  red: { label: "Red flag", tone: "bg-buoy" },
+  both: { label: "Both", tone: "bg-sun" },
+  not_found: { label: "Not found", tone: "border border-dashed border-deep/50" },
 };
 
 const savedDate = (iso: string) =>
   new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 
+function ruleLine(r: BrandResult) {
+  const good = r.good ?? 0;
+  const red = r.red ?? 0;
+  const both = r.checks.filter((c) => c.mark === "both").length;
+  const parts = [`${good} good ${good === 1 ? "sign" : "signs"}`, `${red} red ${red === 1 ? "flag" : "flags"}`];
+  if (both) parts.push(`${both} with both`);
+  return `${parts.join(", ")} across ${r.checks.length} checks.`;
+}
+
 function removedLine(w: BrandResult["removedWhy"]) {
-  const n = w.mismatch + w.wrongSite + w.banned + w.guides;
+  const n = w.mismatch + w.wrongSite + w.banned;
   const parts = [
     w.mismatch && `${w.mismatch} didn’t match the page they cite`,
-    w.wrongSite && `${w.wrongSite} came from the wrong site`,
+    w.wrongSite && `${w.wrongSite} came from the brand’s own site`,
     w.banned && `${w.banned} used legal wording Low Tide doesn’t show`,
-    w.guides && `${w.guides} didn’t match the Guides`,
   ].filter(Boolean);
   return `${n} ${n === 1 ? "quote" : "quotes"} removed: ${parts.join(", ")}.`;
 }
@@ -158,49 +178,36 @@ function FindingCard({ f, onTamper }: { f: Shown; onTamper?: () => void }) {
   );
 }
 
-function Label({ children }: { children: ReactNode }) {
-  return <p className="mt-7 text-sm font-semibold uppercase tracking-[0.08em] text-deep/60">{children}</p>;
-}
-
-function BrandClaimCard({ c }: { c: BrandCard }) {
+function CheckCard({ c }: { c: Check }) {
+  const m = MARK[c.mark];
   return (
-    <article className="border-t-2 border-deep/25 py-9">
-      <h3 className="text-2xl font-semibold tracking-[-0.01em]">{c.claim}</h3>
-      <Label>They say</Label>
-      <figure className="mt-3 rounded-md bg-white/65 p-4 sm:p-6">
-        <blockquote className="font-serif text-[1.08rem] leading-[1.7]">
-          <mark className="bg-sun text-deep">{c.quote}</mark>
-        </blockquote>
-        <figcaption className="mt-3 flex flex-wrap items-baseline justify-between gap-2 text-sm">
-          <a href={c.url} target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-2">
-            {c.host}
-          </a>
-          <span className="text-deep/65">Quote checked word for word against their page</span>
-        </figcaption>
-      </figure>
-      <Label>Green Guides reading</Label>
-      {c.findings === null ? (
-        <p className="mt-3 max-w-[65ch] text-deep/70">The Guides reading didn&rsquo;t come back for this quote. Try again later.</p>
-      ) : c.findings.length ? (
-        c.findings.map((f) => <FindingCard key={`${f.phrase}-${f.section}`} f={f} />)
-      ) : (
-        <p className="mt-3 max-w-[65ch] text-deep/70">No verified Guides finding for this quote.</p>
-      )}
-      <Label>Others say</Label>
-      {c.evidence.length ? (
-        c.evidence.map((e) => (
-          <figure key={`${e.url}-${e.quote.slice(0, 24)}`} className="mt-3 rounded-md border border-deep/15 p-4 sm:p-6">
-            <figcaption className="flex flex-wrap items-center gap-3 text-sm">
-              <span className={`rounded-full px-3 py-1 font-semibold ${STANCE[e.stance].tone}`}>{STANCE[e.stance].label}</span>
-              <a href={e.url} target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-2">
-                {e.host}
-              </a>
+    <article className="border-t border-deep/15 py-7">
+      <div className="flex flex-wrap items-center gap-3">
+        <h3 className="text-xl font-semibold">{CHECK_TITLE[c.check]}</h3>
+        <span className={`rounded-full px-3 py-1 text-sm font-semibold ${m.tone}`}>{m.label}</span>
+      </div>
+      {c.signals.length ? (
+        c.signals.map((s) => (
+          <figure key={`${s.url}-${s.quote.slice(0, 24)}`} className="mt-4 rounded-md bg-white/65 p-4 sm:p-6">
+            <p className="max-w-[65ch] leading-relaxed">{s.note}</p>
+            <blockquote className="mt-3 font-serif text-[1.08rem] leading-[1.7]">
+              <mark className="bg-sun text-deep">{s.quote}</mark>
+            </blockquote>
+            <figcaption className="mt-3 flex flex-wrap items-baseline justify-between gap-2 text-sm">
+              <span>
+                <a href={s.url} target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-2">
+                  {s.host}
+                </a>
+                {s.own && <span className="ml-2 text-deep/65">their own site</span>}
+              </span>
+              <span className="text-deep/65">Quote checked word for word against this page</span>
             </figcaption>
-            <blockquote className="mt-3 font-serif text-[1.08rem] leading-[1.7]">{e.quote}</blockquote>
           </figure>
         ))
       ) : (
-        <p className="mt-3 max-w-[65ch] text-deep/70">No independent source we could verify talks about this claim.</p>
+        <p className="mt-3 max-w-[65ch] text-deep/70">
+          Low Tide couldn&rsquo;t find a source it could verify for this. That isn&rsquo;t the same as a no.
+        </p>
       )}
     </article>
   );
@@ -252,9 +259,9 @@ export default function Home() {
     } catch {
       setBrandResult({
         brand: text,
-        claims: [],
+        checks: [],
         removed: 0,
-        removedWhy: { mismatch: 0, wrongSite: 0, banned: 0, guides: 0 },
+        removedWhy: { mismatch: 0, wrongSite: 0, banned: 0 },
         pagesFound: 0,
         pagesRead: 0,
         model: "",
@@ -278,8 +285,9 @@ export default function Home() {
             </>
           ) : (
             <>
-              Type a brand or a link to its sustainability page. Gemini 2.5 Flash finds what the brand says and what
-              others found, and Low Tide checks every quote word for word against the page it came from.
+              Type a brand or a link to its site. Gemini 2.5 Flash searches for certifications, climate action,
+              independent ratings and regulator findings, and Low Tide checks every quote word for word against the page
+              it came from.
             </>
           )}
         </p>
@@ -437,16 +445,25 @@ export default function Home() {
           {brandResult?.error && <p className="text-lg">{brandResult.error}</p>}
           {brandResult && !brandResult.error && (
             <>
-              <h2 className="font-serif text-3xl leading-snug sm:text-4xl">What {brandResult.brand} says, and what others found</h2>
-              <p className="mt-3 text-sm text-deep/65">
+              <h2 className="font-serif text-3xl leading-snug sm:text-4xl">Is {brandResult.brand} sustainable?</h2>
+              {brandResult.verdict && (
+                <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <span className={`rounded-full px-4 py-1.5 text-lg font-semibold ${BRAND_VERDICT[brandResult.verdict].tone}`}>
+                    {BRAND_VERDICT[brandResult.verdict].label}
+                  </span>
+                  <span className="text-deep/80">{ruleLine(brandResult)}</span>
+                </div>
+              )}
+              <p className="mt-3 max-w-[65ch] text-sm text-deep/70">This describes the evidence Low Tide could verify, not a certification.</p>
+              <p className="mt-2 text-sm text-deep/65">
                 {brandResult.source === "sample" && brandResult.savedOn
                   ? `Saved answer from ${modelName(brandResult.model)} with Google Search, checked against these pages on ${savedDate(brandResult.savedOn)}.`
                   : `Researched live by ${modelName(brandResult.model)} with Google Search.`}{" "}
                 Read {brandResult.pagesRead} of {brandResult.pagesFound} sources found.
               </p>
               <div className="mt-8">
-                {brandResult.claims.map((c) => (
-                  <BrandClaimCard key={c.quote.slice(0, 40)} c={c} />
+                {brandResult.checks.map((c) => (
+                  <CheckCard key={c.check} c={c} />
                 ))}
               </div>
               {brandResult.removed > 0 && <p className="mt-2 font-semibold">{removedLine(brandResult.removedWhy)}</p>}
@@ -458,7 +475,7 @@ export default function Home() {
       <footer className="mt-20 border-t border-deep/15 pt-6 text-sm leading-relaxed text-deep/70">
         Low Tide reads your claim against the FTC Green Guides (16 CFR Part 260). It is not legal advice. Every quote is
         checked word for word against the Guides before it is shown.
-        {mode === "brand" && " Brand and source quotes are checked word for word against the page they came from."}
+        {mode === "brand" && " In brand mode, every quote is checked word for word against the page it came from."}
       </footer>
     </main>
   );
