@@ -81,7 +81,10 @@ function removedLine(w: BrandResult["removedWhy"]) {
   const parts = [
     w.mismatch && `${w.mismatch} didn’t match the page they cite`,
     w.offCheck && `${w.offCheck} didn’t fit ${w.offCheck === 1 ? "its check" : "their checks"}`,
-    w.wrongSite && `${w.wrongSite} came from the brand’s own site`,
+    w.wrongSite &&
+      (w.wrongSite === 1
+        ? "1 was the brand vouching for its own certification or rating"
+        : `${w.wrongSite} were the brand vouching for its own certifications or ratings`),
     w.banned && `${w.banned} used legal wording Low Tide doesn’t show`,
   ].filter(Boolean);
   return `${n} ${n === 1 ? "quote" : "quotes"} removed: ${parts.join(", ")}.`;
