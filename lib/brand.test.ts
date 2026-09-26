@@ -127,6 +127,17 @@ test("guardBrand drops quotes that use a banned word", () => {
   assert.equal(removed.banned, 1);
 });
 
+test("guardBrand softens a banned word in the claim label and drops a source whose host shows one", () => {
+  const pages = [...PAGES, page("S6", "green-lawsuits.example", BACKS)];
+  const { claims, removed } = guardBrand(
+    pick([{ stance: "backs", sourceId: "S6", quote: BACKS }], { claim: "Repairs avoid a lawsuit over waste" }),
+    pages,
+  );
+  assert.equal(claims[0].claim, "Repairs avoid a dispute over waste");
+  assert.equal(claims[0].evidence.length, 0);
+  assert.equal(removed.banned, 1);
+});
+
 test("guardBrand accepts sloppy source ids", () => {
   const { claims } = guardBrand(
     pick([{ stance: "backs", sourceId: " S2 ", quote: BACKS }], { sourceId: "[S1]" }, ["s1"]),

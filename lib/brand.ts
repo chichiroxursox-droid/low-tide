@@ -2,7 +2,7 @@ import { generateText, Output } from "ai";
 import { google, type GoogleProviderMetadata } from "@ai-sdk/google";
 import { z } from "zod";
 import { askGemini, MODEL } from "./check.ts";
-import { BANNED, verifyQuote, type Finding } from "./guard.ts";
+import { BANNED, soften, verifyQuote, type Finding } from "./guard.ts";
 
 export type Page = { url: string; host: string; text: string };
 export type SourcePage = Page & { id: string };
@@ -129,7 +129,7 @@ export function guardBrand(picked: Picked, pages: SourcePage[]): { claims: Brand
     const page = byId.get(sid(id));
     if (!page || !verifyQuote(quote, page.text)) return "mismatch";
     if (fromBrand ? !own.has(page.id) : onOwnHost(page.host)) return "wrongSite";
-    if (BANNED.test(quote)) return "banned";
+    if (BANNED.test(quote) || BANNED.test(page.host)) return "banned";
     return page;
   };
 
@@ -146,7 +146,7 @@ export function guardBrand(picked: Picked, pages: SourcePage[]): { claims: Brand
       if (typeof src === "string") removed[src]++;
       else evidence.push({ stance: e.stance, quote: e.quote, url: src.url, host: src.host });
     }
-    claims.push({ claim: c.claim, quote: c.quote, url: page.url, host: page.host, evidence });
+    claims.push({ claim: soften(c.claim), quote: c.quote, url: page.url, host: page.host, evidence });
   }
   return { claims, removed };
 }
