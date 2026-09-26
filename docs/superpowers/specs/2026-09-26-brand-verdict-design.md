@@ -65,7 +65,7 @@ Each check's mark: `good` if only good findings survive, `red` if only red, `bot
 
 - Intro: "Type a brand or a link to its site. Gemini 2.5 Flash searches for certifications, climate action, independent ratings and regulator findings, and Low Tide checks every quote word for word against the page it came from."
 - Heading "Is H&M sustainable?", verdict pill (Strong record in sea glass, Mixed record in sun, Red flags in buoy, Not enough evidence dashed), the rule line ("2 good signs, 1 red flag across 4 checks."), "This describes the evidence Low Tide could verify, not a certification.", saved or live line, "Read N of M sources found."
-- Four check cards in fixed order, each with a mark pill (Good sign, Red flag, Both, Not found), and per finding: its plain note, the quote, the source link, a "their own site" tag when brand-owned. Not found: "Low Tide couldn't find a source it could verify for this. That isn't the same as a no."
+- Four check cards in fixed order, each with a mark pill (Good sign, Red flag, Both, Not found), and per finding: its plain note, the quote, the source link, a "their own site" tag when brand-owned, and in a Both card a Good sign or Red flag tag on each finding. The rule line spells a Both check as "1 with both a good sign and a red flag". Not found: "Low Tide couldn't find a source it could verify for this. That isn't the same as a no."
 - Removed line as in `v2`, reasons: didn't match the page they cite, didn't fit its check, came from the brand's own site, used legal wording Low Tide doesn't show.
 - Footer: exact text, plus in brand mode only: " In brand mode, every quote is checked word for word against the page it came from."
 

@@ -72,7 +72,7 @@ function ruleLine(r: BrandResult) {
   const red = r.red ?? 0;
   const both = r.checks.filter((c) => c.mark === "both").length;
   const parts = [`${good} good ${good === 1 ? "sign" : "signs"}`, `${red} red ${red === 1 ? "flag" : "flags"}`];
-  if (both) parts.push(`${both} with both`);
+  if (both) parts.push(`${both} with both a good sign and a red flag`);
   return `${parts.join(", ")} across ${r.checks.length} checks.`;
 }
 
@@ -190,6 +190,11 @@ function CheckCard({ c }: { c: Check }) {
       {c.signals.length ? (
         c.signals.map((s) => (
           <figure key={`${s.url}-${s.quote.slice(0, 24)}`} className="mt-4 rounded-md bg-white/65 p-4 sm:p-6">
+            {c.mark === "both" && (
+              <span className={`mb-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${MARK[s.sign].tone}`}>
+                {MARK[s.sign].label}
+              </span>
+            )}
             <p className="max-w-[65ch] leading-relaxed">{s.note}</p>
             <blockquote className="mt-3 font-serif text-[1.08rem] leading-[1.7]">
               <mark className="bg-sun text-deep">{s.quote}</mark>
