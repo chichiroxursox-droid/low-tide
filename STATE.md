@@ -119,3 +119,12 @@ Spec `docs/superpowers/specs/2026-09-26-brand-mode-design.md`, plan `docs/superp
 - Notes: live checks lean on the model to say which sites are the brand's own (Allbirds quotes came from allbirds.com.kw and allbirdsbenelux.nl). Guard backs that up with a same-host and subdomain check
 - Next step: B3, README, DEVPOST, CLAUDE.md, video, tag v2
 - Scope cuts so far: none
+
+### Sat 3:25pm, B3
+- Milestone: hit, about 6 hours ahead of the 9:30pm target. Tagged `v2` on GitHub and deployed. `v1` stays as the rollback point
+- Prod URL works: yes (redeployed, 200). Code unchanged since B2; this milestone is docs and video
+- Tests pass: yes, 25/25
+- What broke: a skeptical check of the new docs found 6 overstatements, all fixed (for example "up to 8 pages" when a pasted link makes it 9, and "calls only the Gemini API" when brand mode also downloads web pages)
+- Notes: README has a brand mode section and 7 new limitations. DEVPOST.md is 699 words and names Sustainability and Best Use of Gemini. CLAUDE.md rules updated (brand samples are real companies shown only through verified quotes, brand footer sentence, new files, new demo path). New video ~/Desktop/low-tide-demo.mp4, H.264, 1280x800, 76.7s, recorded from prod: Biodegradable chip, ocean plastic chip, H&M sample with the acm.nl pushback, live claim, tamper test. Frames checked. The v1 video is kept at ~/Desktop/low-tide-demo-v1.mp4
+- Next step: Ethan submits on Devpost (tasks/todo.md). Code freeze Sun 8:00am
+- Scope cuts so far: none
