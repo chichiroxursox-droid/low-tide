@@ -108,8 +108,8 @@ export default function Home() {
       <header>
         <h1 className="text-6xl font-bold tracking-[-0.04em] sm:text-8xl">Low Tide</h1>
         <p className="mt-5 max-w-[58ch] text-lg leading-relaxed text-deep/80">
-          Paste a green claim from a product. Low Tide checks it against the FTC Green Guides and shows the exact passage
-          behind every answer.
+          Paste a green claim from a product. Gemini 2.5 Flash reads it against the FTC Green Guides, and Low Tide checks
+          every quote it cites word for word before showing you the passage.
         </p>
       </header>
 
