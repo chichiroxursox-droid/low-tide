@@ -74,3 +74,12 @@ Bell was Sat Sept 26 10:00am EDT. If a milestone runs 90 min late, take the next
 - Notes: `~/Desktop/low-tide-demo.mp4`, H.264, 1280x800, 72.8s, 5.6MB. Made by `node scripts/record-demo.mjs` (uses the global Playwright, not a project dependency), then ffmpeg to libx264. Checked every 4s frame: hero, 260.8 highlight, 260.5, ocean plastic not covered, live claim typed and checked (260.4 + 260.13), tamper test, "1 finding removed", footer caption. Captions stand in for narration. Live Gemini output varied between runs even at temperature 0 (a different 260.13 quote), so that goes in the README limitations
 - Next step: M7, README (what it does, how the check works, limitations, AI disclosure)
 - Scope cuts so far: none
+
+### Sat 12:45pm, M7
+- Milestone: hit, about 12 hours ahead of the Sun 12:30am target
+- Prod URL works: yes (redeployed, 200)
+- Tests pass: yes, 7/7
+- What broke: nothing. Caught and reworded one README line that used a banned word
+- Notes: README covers what it does, how the check works (source text, structured output, guard functions, tamper test, offline samples, tests), how to run it, 9 limitations, and an AI disclosure (built with Claude Code on Claude Opus 5.5; runtime is only Gemini 2.5 Flash via the Gemini API and Vercel AI SDK; eCFR is used at build time only). A scan found no em dashes in README or UI files
+- Next step: M8, DEVPOST.md under 700 words naming the Sustainability track and Best Use of Gemini, then tag v1 as the code freeze
+- Scope cuts so far: none

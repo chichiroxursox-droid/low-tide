@@ -59,7 +59,7 @@ The backup demo video comes from `node scripts/record-demo.mjs <url> <outDir>`, 
 - **Text only.** You type or paste the claim. There is no photo or label scanning.
 - **Point in time.** The Guides text is from eCFR as of 2026-09-24. If the FTC revises the Guides, `lib/guides.json` needs a refresh.
 - **No rate limiting** on the live endpoint. Claims are capped at 500 characters.
-- **Not legal advice.** Low Tide is a reading of published guidance. It never says a claim is illegal.
+- **Not legal advice.** Low Tide is a reading of published guidance. It never tells you a claim breaks the law.
 
 ## AI disclosure
 
