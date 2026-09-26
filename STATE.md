@@ -120,7 +120,7 @@ Spec `docs/superpowers/specs/2026-09-26-brand-mode-design.md`, plan `docs/superp
 - Next step: B3, README, DEVPOST, CLAUDE.md, video, tag v2
 - Scope cuts so far: none
 
-### Sat 3:25pm, B3
+### Sat 3:18pm, B3
 - Milestone: hit, about 6 hours ahead of the 9:30pm target. Tagged `v2` on GitHub and deployed. `v1` stays as the rollback point
 - Prod URL works: yes (redeployed, 200). Code unchanged since B2; this milestone is docs and video
 - Tests pass: yes, 25/25
