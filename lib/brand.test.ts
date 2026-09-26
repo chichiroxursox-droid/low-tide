@@ -136,6 +136,9 @@ test("missing source ids and banned words are dropped", () => {
   const r = guard({ watchdogs: [f("red", "S9", WATCH), f("red", "S6", LEGAL)] });
   assert.equal(marks(r).watchdogs, "not_found");
   assert.deepEqual(r.removed, { mismatch: 1, offCheck: 0, wrongSite: 0, banned: 1 });
+  const host = guardChecks(pick({ watchdogs: [f("red", "S1", WATCH)] }), [page("S1", "aboutlawsuits.com", WATCH)], "Brand");
+  assert.equal(marks(host).watchdogs, "not_found");
+  assert.equal(host.removed.banned, 1);
 });
 
 test("sloppy source ids still match", () => {

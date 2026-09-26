@@ -150,7 +150,8 @@ export function guardChecks(picked: Picked, pages: SourcePage[], brand: string):
         removed.wrongSite++;
         continue;
       }
-      if (BANNED.test(f.quote) || BANNED.test(page.host)) {
+      // A host joins words with no break between them ("aboutlawsuits.com"), so it is searched without word boundaries.
+      if (BANNED.test(f.quote) || /illegal|violation|lawsuit/i.test(page.host)) {
         removed.banned++;
         continue;
       }
