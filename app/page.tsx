@@ -271,8 +271,17 @@ export default function Home() {
       <header>
         <h1 className="text-6xl font-bold tracking-[-0.04em] sm:text-8xl">Low Tide</h1>
         <p className="mt-5 max-w-[58ch] text-lg leading-relaxed text-deep/80">
-          Paste a green claim from a product. Gemini 2.5 Flash reads it against the FTC Green Guides, and Low Tide checks
-          every quote it cites word for word before showing you the passage.
+          {mode === "claim" ? (
+            <>
+              Paste a green claim from a product. Gemini 2.5 Flash reads it against the FTC Green Guides, and Low Tide
+              checks every quote it cites word for word before showing you the passage.
+            </>
+          ) : (
+            <>
+              Type a brand. Gemini 2.5 Flash searches the web for what the brand says about itself and what others found,
+              and Low Tide checks every quote word for word against the page it came from.
+            </>
+          )}
         </p>
       </header>
 
@@ -341,10 +350,6 @@ export default function Home() {
             if (brand.trim().length >= 2) checkBrand(brand.trim());
           }}
         >
-          <p className="max-w-[58ch] leading-relaxed text-deep/80">
-            Type a brand. Gemini 2.5 Flash searches the web for what the brand says about itself and what others found, and
-            Low Tide checks every quote word for word against the page it came from.
-          </p>
           <label htmlFor="brand" className="sr-only">
             Brand name or link
           </label>
@@ -355,7 +360,7 @@ export default function Home() {
             value={brand}
             onChange={(e) => setBrand(e.target.value)}
             placeholder="Brand name or link to their sustainability page"
-            className="mt-4 w-full rounded-md border border-deep/25 bg-white/70 p-4 text-lg placeholder:text-deep/45 focus:border-deep focus:outline-none"
+            className="w-full rounded-md border border-deep/25 bg-white/70 p-4 text-lg placeholder:text-deep/45 focus:border-deep focus:outline-none"
           />
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
             <button
