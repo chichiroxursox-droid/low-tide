@@ -67,20 +67,20 @@ await caption("The Guides never mention ocean plastic, so Low Tide says so inste
 await wait(6500);
 
 await top();
-await caption("Brand mode: Gemini 2.5 Flash with Google Search finds what a brand says and what others found.");
+await caption("Brand mode asks a bigger question: is this brand sustainable?");
 await page.getByRole("button", { name: "A brand" }).click();
-await wait(2500);
+await wait(2000);
 await page.getByRole("button", { name: "H&M", exact: true }).click();
-const brandHeading = page.getByRole("heading", { name: /What H&M says/ });
+const brandHeading = page.getByRole("heading", { name: "Is H&M sustainable?" });
 await brandHeading.waitFor();
+await page.getByText("Red flags", { exact: true }).waitFor();
 await scrollTo(brandHeading);
-await caption("H&M is a saved sample. Its quotes were checked word for word against their pages on Sep 26, 2026.");
-await wait(5500);
-await scrollTo(page.locator("article h3").first());
-await caption("They say: H&M’s own words, quoted from hmgroup.com.");
+await caption("H&M is a saved answer. Every quote was checked word for word against its page on Sep 26, 2026.");
 await wait(4500);
-await caption("Others say: the Dutch Authority for Consumers and Markets pushes back, quoted from acm.nl.");
-await scrollTo(page.locator("figure", { hasText: "acm.nl" }).first());
+await caption("Red flags comes from a fixed rule over four checks, not from Gemini’s opinion.");
+await wait(5000);
+await scrollTo(page.locator("figure", { hasText: "Norwegian Consumer Authority" }).first());
+await caption("Regulator and watchdog findings: Norway’s Consumer Authority on the Conscious Collection.");
 await wait(7000);
 
 await caption("Back to one claim. We type this one in live, and Gemini 2.5 Flash checks it.");

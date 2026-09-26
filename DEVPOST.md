@@ -3,7 +3,7 @@
 **Track:** Sustainability
 **Sponsor prize:** Best Use of Gemini
 
-**Tagline:** Check a green claim, or a whole brand. Every quote on screen is checked word for word against its source.
+**Tagline:** Check a green claim, or ask whether a brand is sustainable. Every quote is checked word for word against its source.
 
 **Try it:** https://low-tide-nine.vercel.app
 **Code:** https://github.com/chichiroxursox-droid/low-tide
@@ -22,35 +22,38 @@ So the rule I built around: no verified quote, no verdict. When the tide goes ou
 - **OK if they can prove it.** The Guides allow the claim if the seller has solid evidence.
 - **Not covered by the Guides.** The Guides never mention "ocean plastic", and Low Tide says so rather than forcing a rule to fit.
 
-Each finding shows its Guides paragraph with the quote highlighted and a link to eCFR.
+Each finding shows its Guides paragraph with the quote highlighted.
 
-**Brand mode.** Type a company's name or paste a link. Low Tide shows up to three claims the brand makes about itself, each with a Green Guides reading and up to two verified passages from other sites that back it up or push back. In the saved H&M sample, the Dutch consumer regulator pushes back. No score: the shopper decides.
+**Brand mode.** Type a brand's name or a link, and Low Tide asks "Is it sustainable?" across four checks: certifications, climate action, independent ratings, and regulator and watchdog findings. Every Good sign or Red flag is a verified quote, and Not found means nothing could be verified, not a no. A rule in code turns the marks into Strong record, Mixed record, Red flags or Not enough evidence.
 
 ## How I built it
 
 - **Gemini 2.5 Flash through the Vercel AI SDK**, with zod structured output, so every finding arrives with its own quote to test.
-- **The guard.** The server normalizes each quote (curly quotes, dashes, spacing, case) and requires an exact match of at least six words in the section Gemini cited. Failures are removed and counted on screen.
-- **A tamper test** changes one word of a verified quote and sends it back through the same check, so you can watch it get removed.
-- **The brand guard** checks every brand and source quote against the page it cites. Claims must come from the brand's own sites, evidence from anyone else.
-- **Offline samples.** Four claims and two brands are saved, unedited Gemini answers that still pass through the guard, so the demo works without an API key.
-- **25 unit tests** (`node --test`) cover both guards, the page reader and link safety.
+- **The guard** normalizes each quote (curly quotes, dashes, spacing, case) and requires an exact match of at least six words in the cited source. Failures are removed and counted. A tamper test changes one word to show a removal live.
+- **Brand source rules live in code.** Certifications only count for a brand, watchdog findings only against it, and a brand can't vouch for its own certifications or ratings. Own sites are known by address.
+- **The verdict is a fixed rule** over the four marks, never Gemini's opinion.
+- **Offline samples.** Four claims and two brands are saved, unedited Gemini answers, so the demo needs no API key.
+- **27 unit tests** (`node --test`).
 
 ## How Gemini is used
 
-Gemini does the reading: it finds the environmental phrases, picks the section, decides the verdict and explains it. Brand mode adds Google Search grounding. The first call searches for the brand's pages and independent sources. Low Tide keeps only the links search returned and downloads each page itself. A second call, with no tools, quotes from that text by source id. Gemini finds the sources, and Low Tide verifies every quote against the page.
+Gemini does the reading. Brand mode runs four Google Search grounded calls in parallel, one per check. Low Tide keeps only the returned links, downloads the pages, and drops any that never name the brand. A final call with no tools quotes from that text and marks each quote good or red. Low Tide verifies every quote and computes the verdict.
 
 ## Challenges
 
-With default thinking, Gemini filed "carbon neutral" under general benefits and stretched "ocean plastic" into the recycled content rules. Two prompt rules fixed it, and a zero thinking budget made it about five times faster. Asked to write source URLs, Gemini garbled Google's redirect links, and 1 of 37 brand quotes verified. Taking links from the search results and quoting downloaded pages raised that to 15 of 16.
+Gemini stretched "ocean plastic" into recycled content rules until a zero thinking budget and two prompt rules fixed it. Asked to write source URLs, Gemini garbled Google's redirect links, and 1 of 37 quotes verified. Quoting pages downloaded from search result links raised that to 15 of 16.
+
+A made-up brand scored Mixed record from generic pages that never named it, so pages must now name the brand. Gemini also called a review blog Patagonia's own site, so a site's address now decides that.
 
 ## Accomplishments and lessons
 
-The core promise lives in code, not the prompt. A small tested function beat a longer prompt.
+The core promise lives in code, not the prompt. A small tested function beat a longer prompt, twice.
 
 ## What's next
 
-- Load all of Part 260, not just six sections
-- Check that each quote actually supports its verdict, not just that it exists
+- Load all of Part 260
+- Check that each quote supports its verdict
+- Recognize parent companies' sites, and cover small brands better
 
 ## Built with
 
@@ -58,4 +61,4 @@ Next.js, TypeScript, Tailwind CSS, Vercel, Vercel AI SDK, Google Gemini API (Gem
 
 ## AI disclosure
 
-Built with Claude Code (Claude Opus 5.5) during the event. The app's only runtime AI API is the Gemini API: Gemini 2.5 Flash, plus Google Search grounding in brand mode. Low Tide is a reading of published guidance, not legal advice.
+Built with Claude Code (Claude Opus 5.5) during the event. The only runtime AI API is the Gemini API: Gemini 2.5 Flash, plus Google Search grounding in brand mode (up to five calls per live brand check). Low Tide is a reading of evidence, not legal advice.
