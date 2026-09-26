@@ -149,3 +149,12 @@ Ethan reframed brand mode at 3:20pm: a verdict about the brand, not its claims a
 - What broke: a three-lens review found 14 issues, 12 fixed with tests: link names taken from the first host label ("www2", "corporate"), "&" and possessive spellings (Ben & Jerry's, Levi's, Marks & Spencer), accents splitting words (L'Oreal), "Co-op" losing its name, loose own-site matching (msci.com for M&S), banned words inside a host name, Both cards not saying which quote is which, a confusing removed line, a long link host overflowing at 390px. Deferred: Patagonia's only red flag quotes clumsy machine-translated English (re-seed would cost calls; it is verbatim), and the demo recorder still expects v2 (C3)
 - Next step: C3, docs, video, tag v3
 - Scope cuts so far: none
+
+### Sat 4:58pm, C3
+- Milestone: hit, ahead of the 8:00pm target. Tagged `v3` on GitHub and deployed. `v2` (claim comparison) and `v1` stay as rollback points
+- Prod URL works: yes (redeployed, 200). Code unchanged since C2; this milestone is docs and video
+- Tests pass: yes, 27/27
+- What broke: a skeptical check of the new docs found 10 issues, all fixed (for example "five Gemini calls" when the pick call is skipped if no page names the brand, and a DEVPOST challenge that credited the own-site rule with fixing the made-up brand). CLAUDE.md's "no verdict without a verified quote" rule now names brand mode's honest no-answer states (Not enough evidence, Not found)
+- Notes: README brand section rewritten for the verdict with new limitations. DEVPOST.md 699 words, names Sustainability and Best Use of Gemini. CLAUDE.md brand contract, footer sentence, scope cuts and demo path updated. New video ~/Desktop/low-tide-demo.mp4, H.264, 1280x800, 76.4s, from prod: Biodegradable chip, ocean plastic chip, H&M verdict (Red flags) with the Norwegian Consumer Authority quote, live claim, tamper test. Earlier videos kept as low-tide-demo-v1.mp4 and low-tide-demo-v2.mp4
+- Next step: Ethan submits on Devpost (tasks/todo.md). Code freeze Sun 8:00am
+- Scope cuts so far: none
