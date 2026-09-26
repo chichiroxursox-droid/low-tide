@@ -251,7 +251,7 @@ export async function pickQuotes(brand: string, pages: SourcePage[]): Promise<Pi
 
 const SUFFIXES = /\b(inc|co|company|corp|corporation|ltd|llc|plc|group|gmbh)\b\.?/gi;
 // Lowercased words, accents and punctuation stripped. "&" stays a word of its own, so "H&M" and "H & M" match.
-const words = (s: string) => ` ${s.normalize("NFKD").toLowerCase().replace(/&/g, " & ").replace(/[^a-z0-9&]+/g, " ").trim()} `;
+const words = (s: string) => ` ${s.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().replace(/&/g, " & ").replace(/[^a-z0-9&]+/g, " ").trim()} `;
 
 // ponytail: whole-word match anywhere on the page, so a name that is also a common word ("Gap") passes most pages;
 // the pick prompt still asks for passages about the brand itself.

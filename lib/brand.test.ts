@@ -14,6 +14,9 @@ test("namesBrand finds the brand as whole words, however the page spells the pun
   assert.equal(namesBrand("Which brands are B Corps: H&M & Zara", "h&m"), true);
   assert.equal(namesBrand("Patagonia's mission statement", "Patagonia"), true);
   assert.equal(namesBrand("Nestlé said on Monday", "Nestle"), true);
+  assert.equal(namesBrand("L'Oréal Group reported its emissions", "L'Oreal"), true);
+  assert.equal(namesBrand("L'Oreal reported its emissions", "L'Oréal"), true);
+  assert.equal(namesBrand("Hermès published a climate report", "Hermes"), true);
   assert.equal(namesBrand("The North Face jacket", "North Face"), true);
   assert.equal(namesBrand("Patagonia Inc. reported", "Patagonia, Inc."), true);
   assert.equal(namesBrand("L.L.Bean boots", "L.L.Bean"), true);
