@@ -454,7 +454,7 @@ export default function Home() {
           {brandResult?.error && <p className="text-lg">{brandResult.error}</p>}
           {brandResult && !brandResult.error && (
             <>
-              <h2 className="font-serif text-3xl leading-snug sm:text-4xl">Is {brandResult.brand} sustainable?</h2>
+              <h2 className="font-serif text-3xl leading-snug break-words sm:text-4xl">Is {brandResult.brand} sustainable?</h2>
               {brandResult.verdict && (
                 <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
                   <span className={`rounded-full px-4 py-1.5 text-lg font-semibold ${BRAND_VERDICT[brandResult.verdict].tone}`}>
