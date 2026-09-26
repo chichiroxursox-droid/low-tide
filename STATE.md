@@ -10,14 +10,14 @@ Bell was Sat Sept 26 10:00am EDT. If a milestone runs 90 min late, take the next
 
 | # | Target | Done when | Status |
 |---|---|---|---|
-| M1 | Sat 11:00am | Repo on GitHub, hello world live on the prod URL | |
-| M2 | Sat 1:00pm | Guides typed in, `verifyQuote` passes its tests | |
-| M3 | Sat 3:00pm | Gemini returns typed findings, guard filters them, sample fixtures saved | |
-| M4 | Sat 6:00pm | GATE: a judge can run the whole demo path on prod | |
-| M5 | Sat 8:00pm | Gemini visibly load-bearing in the UI, offline path proven with key removed. Dependency freeze | |
-| M6 | Sat 10:00pm | Backup demo video recorded from prod | |
-| M7 | Sun 12:30am | README done (what, how the check works, limits, AI disclosure) | |
-| M8 | Sun 6:00am | Code freeze, DEVPOST.md drafted | |
+| M1 | Sat 11:00am | Repo on GitHub, hello world live on the prod URL | hit 11:48am |
+| M2 | Sat 1:00pm | Guides typed in, `verifyQuote` passes its tests | hit 11:58am |
+| M3 | Sat 3:00pm | Gemini returns typed findings, guard filters them, sample fixtures saved | hit 12:21pm |
+| M4 | Sat 6:00pm | GATE: a judge can run the whole demo path on prod | hit 12:28pm |
+| M5 | Sat 8:00pm | Gemini visibly load-bearing in the UI, offline path proven with key removed. Dependency freeze | hit 12:33pm |
+| M6 | Sat 10:00pm | Backup demo video recorded from prod | hit 12:40pm |
+| M7 | Sun 12:30am | README done (what, how the check works, limits, AI disclosure) | hit 12:45pm |
+| M8 | Sun 6:00am | Code freeze, DEVPOST.md drafted | hit 12:49pm |
 
 ## Log
 
@@ -82,4 +82,13 @@ Bell was Sat Sept 26 10:00am EDT. If a milestone runs 90 min late, take the next
 - What broke: nothing. Caught and reworded one README line that used a banned word
 - Notes: README covers what it does, how the check works (source text, structured output, guard functions, tamper test, offline samples, tests), how to run it, 9 limitations, and an AI disclosure (built with Claude Code on Claude Opus 5.5; runtime is only Gemini 2.5 Flash via the Gemini API and Vercel AI SDK; eCFR is used at build time only). A scan found no em dashes in README or UI files
 - Next step: M8, DEVPOST.md under 700 words naming the Sustainability track and Best Use of Gemini, then tag v1 as the code freeze
+- Scope cuts so far: none
+
+### Sat 12:49pm, M8
+- Milestone: hit. Code frozen and tagged `v1` on GitHub, 19 hours before the Sun 8:00am hard stop. From here, only README, video and DEVPOST.md may change
+- Prod URL works: yes. Final probe on prod: 4 samples served through the guard, live claim answered by Gemini in 1.8s, tamper recheck removed=1, bad input gets a JSON 400
+- Tests pass: yes, 7/7
+- What broke: DEVPOST.md first came in at 777 words. Trimmed to 691 by merging overlapping sections
+- Done check: (1) `node --test` 7/7 pass. (2) `vercel --prod` live at https://low-tide-nine.vercel.app, 200, full demo path works, offline path proven at M5. (3) Public repo chichiroxursox-droid/low-tide, no `.env*` in the tree or history. (4) README has what, how, limitations, AI disclosure. (5) ~/Desktop/low-tide-demo.mp4, H.264, 72.8s, frames checked. (6) DEVPOST.md, 691 words, names Sustainability and Best Use of Gemini. (7) This log has M1 to M8
+- Next step: Ethan submits on Devpost (see tasks/todo.md). Nothing left for the build
 - Scope cuts so far: none
