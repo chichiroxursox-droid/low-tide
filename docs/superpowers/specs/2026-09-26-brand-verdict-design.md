@@ -35,8 +35,13 @@ input (name or link, unchanged)
 
 ## Source rules (`guardChecks`)
 
+Revised after the first build (a made-up brand got "Mixed record" from generic pages about other companies, and Gemini marked "not a B Corp" red and called a review blog Patagonia's own site). Rules that were prompts are now code:
+
+- Before the pick call, a downloaded page that never names the brand (`namesBrand`, whole words, "&" and accents normalized) is dropped. The pasted link is exempt. A made-up brand ends with 0 pages read and "Couldn't find enough".
 - A finding is kept only if its source exists and `verifyQuote(quote, page.text)` passes (else `mismatch`).
-- Certifications and Independent ratings: a `good` finding from a brand-owned page (in `ownSites`, or the same host or a subdomain of an own page's host) is refused (`wrongSite`). The brand can't vouch for itself.
+- Signs per check: certifications only `good`, watchdogs only `red`, climate and ratings either. Anything else is dropped (`offCheck`, shown as "didn't fit its check").
+- A page is the brand's own when a label of its host contains the brand's name (`hostNamesBrand`; names under 4 characters must start the label). Gemini no longer lists own sites. A parent company's site is not recognized (README limitation).
+- Certifications and Independent ratings: a `good` finding from a brand-owned page is refused (`wrongSite`). The brand can't vouch for itself.
 - Climate action: may come from the brand's own site (publishing emissions is the point).
 - `red` findings: any source.
 - A quote or source host containing one of the three banned words is dropped (`banned`).
@@ -54,14 +59,14 @@ Each check's mark: `good` if only good findings survive, `red` if only red, `bot
 
 ## API
 
-`POST /api/brand` `{ brand }` returns `{ model, brand, source, savedOn?, pagesFound, pagesRead, verdict, good, red, checks: [{ check, mark, signals: [{ sign, quote, note, url, host, own }] }], removed, removedWhy: { mismatch, wrongSite, banned }, error? }`. Input limits, link refusal, sample lookup, offline message and the friendly error are unchanged from `v2`.
+`POST /api/brand` `{ brand }` returns `{ model, brand, source, savedOn?, pagesFound, pagesRead, verdict, good, red, checks: [{ check, mark, signals: [{ sign, quote, note, url, host, own }] }], removed, removedWhy: { mismatch, offCheck, wrongSite, banned }, error? }`. Input limits, link refusal, sample lookup, offline message and the friendly error are unchanged from `v2`.
 
 ## UI (brand mode)
 
 - Intro: "Type a brand or a link to its site. Gemini 2.5 Flash searches for certifications, climate action, independent ratings and regulator findings, and Low Tide checks every quote word for word against the page it came from."
 - Heading "Is H&M sustainable?", verdict pill (Strong record in sea glass, Mixed record in sun, Red flags in buoy, Not enough evidence dashed), the rule line ("2 good signs, 1 red flag across 4 checks."), "This describes the evidence Low Tide could verify, not a certification.", saved or live line, "Read N of M sources found."
 - Four check cards in fixed order, each with a mark pill (Good sign, Red flag, Both, Not found), and per finding: its plain note, the quote, the source link, a "their own site" tag when brand-owned. Not found: "Low Tide couldn't find a source it could verify for this. That isn't the same as a no."
-- Removed line as in `v2`, reasons: didn't match the page they cite, came from the brand's own site, used legal wording Low Tide doesn't show.
+- Removed line as in `v2`, reasons: didn't match the page they cite, didn't fit its check, came from the brand's own site, used legal wording Low Tide doesn't show.
 - Footer: exact text, plus in brand mode only: " In brand mode, every quote is checked word for word against the page it came from."
 
 ## Samples and tests
