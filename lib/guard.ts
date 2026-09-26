@@ -64,3 +64,30 @@ export function guardFindings(findings: Finding[], guides: Guide[]) {
   }
   return { findings: kept, removed };
 }
+
+// The words the UI must never show (CLAUDE.md hard rules). No g flag, so .test() keeps no lastIndex state.
+export const BANNED = /\b(illegal(ly)?|violations?|lawsuits?)\b/i;
+
+// Safety net for model prose, in case it slips.
+export const soften = (s: string) =>
+  s
+    .replace(/\billegally\b/gi, "improperly")
+    .replace(/\billegal\b/gi, "not allowed")
+    .replace(/\bviolations?\b/gi, "problem")
+    .replace(/\blawsuits?\b/gi, "dispute");
+
+export type Shown = Finding & { title: string; url: string; context: ReturnType<typeof locateQuote> };
+
+// What the page needs for each verified finding: section title and link, the highlight, and softened prose.
+export function present(findings: Finding[], guides: Guide[]): Shown[] {
+  return findings.map((f) => {
+    const g = guides.find((x) => x.section === f.section);
+    return {
+      ...f,
+      why: soften(f.why),
+      title: g?.title ?? "",
+      url: g?.url ?? "",
+      context: g ? locateQuote(f.quote, g.text) : null,
+    };
+  });
+}

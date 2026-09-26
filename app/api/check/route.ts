@@ -2,7 +2,7 @@ import { z } from "zod";
 import guides from "@/lib/guides.json";
 import fixtures from "@/fixtures/samples.json";
 import { askGemini, findingSchema, MODEL } from "@/lib/check";
-import { guardFindings, locateQuote, type Finding } from "@/lib/guard";
+import { guardFindings, present, type Finding } from "@/lib/guard";
 
 const Body = z.union([
   z.object({ claim: z.string().trim().min(3).max(500) }),
@@ -11,10 +11,6 @@ const Body = z.union([
 ]);
 
 const samples = fixtures.samples as Record<string, Finding[]>;
-
-// Safety net for the words the UI must never show, in case the model slips.
-const soften = (s: string) =>
-  s.replace(/\billegal\b/gi, "not allowed").replace(/\bviolations?\b/gi, "problem").replace(/\blawsuits?\b/gi, "dispute");
 
 const reply = (data: object, status = 200) => Response.json({ model: MODEL, findings: [], removed: 0, ...data }, { status });
 
@@ -46,16 +42,7 @@ export async function POST(req: Request) {
     return reply({
       source,
       removed,
-      findings: findings.map((f) => {
-        const g = guides.find((x) => x.section === f.section);
-        return {
-          ...f,
-          why: soften(f.why),
-          title: g?.title ?? "",
-          url: g?.url ?? "",
-          context: g ? locateQuote(f.quote, g.text) : null,
-        };
-      }),
+      findings: present(findings, guides),
     });
   } catch (err) {
     console.error("check failed", err);

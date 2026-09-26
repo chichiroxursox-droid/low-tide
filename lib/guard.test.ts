@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { verifyQuote, guardFindings, locateQuote, type Finding } from "./guard.ts";
+import { verifyQuote, guardFindings, locateQuote, BANNED, soften, present, type Finding } from "./guard.ts";
 import guides from "./guides.json" with { type: "json" };
 
 const text = (s: string) => guides.find((g) => g.section === s)!.text;
@@ -64,4 +64,29 @@ test("guardFindings drops bad quotes, counts them, keeps not_covered", () => {
       ["not_covered", "", true],
     ],
   );
+});
+
+test("BANNED catches the three words and keeps no state between calls", () => {
+  assert.equal(BANNED.test("They face a lawsuit"), true);
+  assert.equal(BANNED.test("They face a lawsuit"), true);
+  assert.equal(BANNED.test("a clear Violation of trust"), true);
+  assert.equal(BANNED.test("sold illegally"), true);
+  assert.equal(BANNED.test("lawful and legal"), false);
+});
+
+test("soften leaves none of the banned words behind", () => {
+  const out = soften("Illegal, illegally, violations and a lawsuit");
+  assert.equal(BANNED.test(out), false);
+  assert.equal(soften("an illegal claim"), "an not allowed claim");
+});
+
+test("present adds the section title, url and highlight, and softens why", () => {
+  const [shown] = present(
+    [{ phrase: "biodegradable", section: "260.8", verdict: "needs_qualification", why: "This is illegal.", quote: REAL }],
+    guides,
+  );
+  assert.equal(shown.title, guides.find((g) => g.section === "260.8")!.title);
+  assert.ok(shown.url.startsWith("https://"));
+  assert.equal(shown.context?.match, REAL);
+  assert.equal(BANNED.test(shown.why), false);
 });
