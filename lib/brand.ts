@@ -59,10 +59,11 @@ export function isSafeUrl(input: string): URL | null {
   } catch {
     return null;
   }
-  const h = u.hostname.toLowerCase();
+  // A trailing dot ("localhost.") is the same host to DNS, so it must not dodge the checks below.
+  const h = u.hostname.toLowerCase().replace(/\.+$/, "");
   if (u.protocol !== "http:" && u.protocol !== "https:") return null;
   if (!h.includes(".") || /^[\d.]+$/.test(h) || h.startsWith("[")) return null;
-  if (/(^|\.)(localhost|local|internal)$/.test(h)) return null;
+  if (/(^|\.)(localhost|localdomain|local|internal)$/.test(h)) return null;
   return u;
 }
 

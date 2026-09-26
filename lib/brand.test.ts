@@ -144,6 +144,11 @@ test("isSafeUrl allows public web pages and refuses everything else", () => {
     "http://2130706433/",
     "https://printer.local",
     "http://metadata.google.internal",
+    "http://localhost./",
+    "http://%6c%6fcalhost./",
+    "http://metadata.google.internal./",
+    "http://printer.local./",
+    "http://localhost.localdomain/",
     "Patagonia",
   ]) {
     assert.equal(isSafeUrl(bad), null, bad);
