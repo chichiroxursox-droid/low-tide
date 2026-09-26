@@ -128,3 +128,24 @@ Spec `docs/superpowers/specs/2026-09-26-brand-mode-design.md`, plan `docs/superp
 - Notes: README has a brand mode section and 7 new limitations. DEVPOST.md is 699 words and names Sustainability and Best Use of Gemini. CLAUDE.md rules updated (brand samples are real companies shown only through verified quotes, brand footer sentence, new files, new demo path). New video ~/Desktop/low-tide-demo.mp4, H.264, 1280x800, 76.7s, recorded from prod: Biodegradable chip, ocean plastic chip, H&M sample with the acm.nl pushback, live claim, tamper test. Frames checked. The v1 video is kept at ~/Desktop/low-tide-demo-v1.mp4
 - Next step: Ethan submits on Devpost (tasks/todo.md). Code freeze Sun 8:00am
 - Scope cuts so far: none
+
+## Brand verdict (v3, reframe: "is this brand sustainable?")
+Ethan reframed brand mode at 3:20pm: a verdict about the brand, not its claims against other sites. Spec `docs/superpowers/specs/2026-09-26-brand-verdict-design.md`, plan `docs/superpowers/plans/2026-09-26-brand-verdict.md`. Checklist (certifications, climate action, independent ratings, regulator and watchdog findings), verdict by rule in code (Strong record, Mixed record, Red flags, Not enough evidence). Targets: C1 5:00pm, C2 6:30pm, C3 8:00pm. Rollback: `v2`.
+
+### Sat 4:18pm, C1
+- Milestone: hit, 40 minutes ahead of target
+- Prod URL works: yes (still v2 until C2)
+- Tests pass: yes, 26/26 at C1 (27/27 after review fixes)
+- What broke: the first build let a made-up brand ("Zqxv Widget Company") score Mixed record twice: every quote was on its page, but no page named the brand. Checked free by re-downloading every cited page: all 13 made-up-brand pages failed to name it, all 18 real-brand pages did. Fix 1: drop pages that never name the brand before the pick call. Gemini then still marked "H&M is not a B Corp" red and called a review blog Patagonia's own site, so fix 2 moved both into code: certifications count only for a brand, watchdog findings only against it, and a site is the brand's own when its address names the brand
+- Notes: re-seeded twice (about 20 Gemini calls, approved). Samples: Patagonia Mixed record (certifications and ratings good, climate both, a French advertising-ethics complaint as the red flag), H&M Red flags (SBTi-validated climate target from its own site, Norwegian Consumer Authority on the Conscious Collection). Made-up brand now reads 0 of 12 pages
+- Next step: review, deploy
+- Scope cuts so far: none
+
+### Sat 4:45pm, C2
+- Milestone: hit, 1 hour 45 minutes ahead of target
+- Prod URL works: yes. Playwright on prod at 390 and 1280: claim sample plus tamper test ("1 finding removed"), both brand samples with their verdicts and 4 check cards, brand footer sentence, no horizontal scroll, no console errors. Live: Allbirds Mixed record in 15.9s, the link patagonia.com/our-footprint Red flags in 17.4s (a different page set than the saved sample), "Zqxv Widget Company" read 0 of 12 pages and got "Couldn't find enough" in 8.1s
+- Offline path: not re-proved by removing the key (route's offline branch unchanged, samples never call Gemini), per the spec
+- Tests pass: yes, 27/27; tsc, lint, build clean; claim-mode files unchanged since v2
+- What broke: a three-lens review found 14 issues, 12 fixed with tests: link names taken from the first host label ("www2", "corporate"), "&" and possessive spellings (Ben & Jerry's, Levi's, Marks & Spencer), accents splitting words (L'Oreal), "Co-op" losing its name, loose own-site matching (msci.com for M&S), banned words inside a host name, Both cards not saying which quote is which, a confusing removed line, a long link host overflowing at 390px. Deferred: Patagonia's only red flag quotes clumsy machine-translated English (re-seed would cost calls; it is verbatim), and the demo recorder still expects v2 (C3)
+- Next step: C3, docs, video, tag v3
+- Scope cuts so far: none
