@@ -47,3 +47,12 @@ Bell was Sat Sept 26 10:00am EDT. If a milestone runs 90 min late, take the next
 - Notes: `GOOGLE_GENERATIVE_AI_API_KEY` set in Vercel production and in `.env.local` (gitignored). Seed with `node --env-file=.env.local scripts/seed.ts`. The route also swaps any banned word in `why` as a safety net
 - Next step: M4, build the page (chips, claim box, verdict cards with highlight, not_covered state, removed line, tamper link, footer)
 - Scope cuts so far: none
+
+### Sat 12:52pm, M4 (GATE)
+- Milestone: hit, about 5 hours ahead of the 6:00pm gate
+- Prod URL works: yes. A headless Playwright run on prod covered all 4 chips, the live claim "Eco-friendly cleaner in a bottle made from recycled materials" (260.4 needs qualification plus 260.13 OK if proven), and a tamper test (changed "should" to "may" in the 260.5 quote, card dropped, "1 finding removed: quote didn't match the Guides."). No console errors, no horizontal scroll at 390px
+- Tests pass: yes, 7/7
+- What broke: nothing major. Fixed from screenshots: claim underline breaking at descenders, a highlight padding gap, and the not covered block repeating the model's why
+- Notes: design uses tidal flat #E7ECE8, deep channel #12343B, buoy #E8B04B, sea glass #9CCBB8, sun #F7E49A; Schibsted Grotesk for UI and Newsreader for Guides text. The Guides passages keep their own em dashes because they are verbatim government text, and our UI copy has none
+- Next step: M5, prove the offline path on prod with the key removed, then restore it
+- Scope cuts so far: none
