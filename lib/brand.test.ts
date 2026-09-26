@@ -85,6 +85,11 @@ test("hostNamesBrand counts a site as the brand's own when its address names the
   assert.equal(hostNamesBrand("thenorthface.com", "North Face"), true);
   assert.equal(hostNamesBrand("allbirds.com.kw", "Allbirds"), true);
   assert.equal(hostNamesBrand("llbean.com", "L.L.Bean"), true);
+  assert.equal(hostNamesBrand("sustainability.aboutamazon.com", "Amazon"), true);
+  assert.equal(hostNamesBrand("hmrc.gov.uk", "H&M"), false);
+  assert.equal(hostNamesBrand("msci.com", "M&S"), false);
+  assert.equal(hostNamesBrand("sciencebasedtargets.org", "Target"), false);
+  assert.equal(hostNamesBrand("stanford.edu", "Ford"), false);
   assert.equal(hostNamesBrand("coop.co.uk", "Co-op"), true);
   assert.equal(hostNamesBrand("openai.com", "Co-op"), false);
 });

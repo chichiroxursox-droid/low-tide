@@ -40,7 +40,7 @@ Revised after the first build (a made-up brand got "Mixed record" from generic p
 - Before the pick call, a downloaded page that never names the brand (`namesBrand`, whole words, "&" and accents normalized) is dropped. The pasted link is exempt. A made-up brand ends with 0 pages read and "Couldn't find enough".
 - A finding is kept only if its source exists and `verifyQuote(quote, page.text)` passes (else `mismatch`).
 - Signs per check: certifications only `good`, watchdogs only `red`, climate and ratings either. Anything else is dropped (`offCheck`, shown as "didn't fit its check").
-- A page is the brand's own when a label of its host contains the brand's name (`hostNamesBrand`; names under 4 characters must start the label). Gemini no longer lists own sites. A parent company's site is not recognized (README limitation).
+- A page is the brand's own when a label of its host starts with the brand's name, "the" or "about" allowed in front (`hostNamesBrand`; a name under 4 characters must be the whole label, a company word like "group" aside, so `hmrc.gov.uk` isn't H&M's). For a link, the name is the label its site is registered under (`ruleName`: `www2.hm.com` is "hm"). Gemini no longer lists own sites. A parent company's site is not recognized (README limitation).
 - Certifications and Independent ratings: a `good` finding from a brand-owned page is refused (`wrongSite`). The brand can't vouch for itself.
 - Climate action: may come from the brand's own site (publishing emissions is the point).
 - `red` findings: any source.

@@ -250,8 +250,9 @@ export async function pickQuotes(brand: string, pages: SourcePage[]): Promise<Pi
   return output;
 }
 
+const CORP = "inc|co|company|corp|corporation|ltd|llc|plc|group|gmbh";
 // A company word at the end of the name only, with the "&" or comma before it: "Levi Strauss & Co." but not "Co-op".
-const SUFFIXES = /[\s,&]*\b(inc|co|company|corp|corporation|ltd|llc|plc|group|gmbh)\b\.?$/i;
+const SUFFIXES = new RegExp(`[\\s,&]*\\b(${CORP})\\b\\.?$`, "i");
 // Lowercased words, accents and punctuation stripped. "&" stays a word of its own, so "H&M" and "H & M" match.
 const words = (s: string) => ` ${s.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().replace(/&/g, " & ").replace(/[^a-z0-9&]+/g, " ").trim()} `;
 
@@ -262,19 +263,18 @@ export function namesBrand(text: string, brand: string): boolean {
   return name.trim() !== "" && words(text).includes(name);
 }
 
-// A site is the brand's own when a label of its address contains the brand's name ("patagoniaworks.com",
-// "allbirds.com.kw"). Short names ("H&M" is "hm") must start a label, so "chmod.com" doesn't count.
+// A site is the brand's own when a label of its address starts with the brand's name ("patagoniaworks.com",
+// "allbirds.com.kw"), "the" or "about" allowed in front ("thenorthface.com", "aboutamazon.com"). A name under
+// 4 letters must be the whole label, a company word aside ("hmgroup.com"), so "hmrc.gov.uk" and "msci.com" don't count.
 // ponytail: a parent company's site (unilever.com for Dove) is not recognized; that needs an ownership list.
 export function hostNamesBrand(host: string, brand: string): boolean {
   const key = words(brand.replace(SUFFIXES, "")).replace(/[^a-z0-9]/g, "");
   if (!key) return false;
+  const own = new RegExp(key.length < 4 ? `^${key}(${CORP})?$` : `^(the|about)?${key}`);
   return host
     .toLowerCase()
     .split(".")
-    .some((label) => {
-      const l = label.replace(/-/g, "");
-      return key.length < 4 ? l.startsWith(key) : l.includes(key);
-    });
+    .some((label) => own.test(label.replace(/-/g, "")));
 }
 
 // The name the source rules match. A link, or a bare domain typed as a name, is named by the label its site is
