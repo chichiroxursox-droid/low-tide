@@ -1,0 +1,175 @@
+{
+  "model": "gemini-2.5-flash",
+  "savedOn": "2026-09-26",
+  "brands": {
+    "Patagonia": {
+      "brand": "Patagonia",
+      "pagesFound": 8,
+      "pagesRead": 7,
+      "claims": [
+        {
+          "claim": "Business to save our home planet",
+          "quote": "Patagonia’s Mission Statement We're in business to save our home planet. We're in business to save our home planet. Our Reason For Being At Patagonia, we appreciate that all life on earth is under threat of extinction.",
+          "url": "https://www.patagonia.com.hk/pages/our-mission",
+          "host": "patagonia.com.hk",
+          "evidence": [
+            {
+              "stance": "backs",
+              "quote": "With its mission statement—“We’re in business to save our home planet”—Patagonia sets a high bar for what it means to be a sustainability-focused outdoor brand.",
+              "url": "https://bettertrail.com/sustainability/patagonia",
+              "host": "bettertrail.com"
+            },
+            {
+              "stance": "backs",
+              "quote": "For Patagonia Founder Yvon Chouinard, being of service has long meant doing business differently. The company continually strives to improve its impact and build its commitment to people and the planet.",
+              "url": "https://usca.bcorporation.net/zbtcz9z23zpatagonia-and-b-corp-community-co-create-a-new-model-of-capitalism/",
+              "host": "usca.bcorporation.net"
+            }
+          ],
+          "findings": [
+            {
+              "phrase": "save our home planet",
+              "section": "260.4",
+              "verdict": "needs_qualification",
+              "why": "The Green Guides say that broad claims like 'save our home planet' are difficult to interpret and likely convey far-reaching environmental benefits, which are hard to substantiate without qualification.",
+              "quote": "Unqualified general environmental benefit claims are difficult to interpret and likely convey a wide range of meanings. In many cases, such claims likely convey that the product, package, or service has specific and far-reaching environmental benefits"
+            },
+            {
+              "phrase": "all life on earth is under threat of extinction",
+              "section": "",
+              "verdict": "not_covered",
+              "why": "The Green Guides do not cover general statements about the state of the planet or threats to life on Earth. They focus on specific environmental attributes of products or services.",
+              "quote": ""
+            }
+          ]
+        },
+        {
+          "claim": "Earth is our only shareholder",
+          "quote": "Its unique ownership structure reflects that Earth is its only shareholder: Profits not reinvested back into the business are paid as dividends to protect the planet.",
+          "url": "https://www.patagoniaworks.com/press/2025/11/11/patagonia-a-work-in-progress",
+          "host": "patagoniaworks.com",
+          "evidence": [
+            {
+              "stance": "backs",
+              "quote": "Patagonia has released its first comprehensive impact report since shifting to a business structure where “the planet is our only shareholder.”",
+              "url": "https://sustonmagazine.com/patagonia-work-in-progress-impact-report-2025/",
+              "host": "sustonmagazine.com"
+            },
+            {
+              "stance": "backs",
+              "quote": "In a groundbreaking move, Chouinard announced in 2022 that he was giving everything away, transferring Patagonia’s voting stock to a purpose-driven trust and the non-voting stock (constituting 98% of the company) to the Holdfast Collective, a nonprofit holding company.",
+              "url": "https://bettertrail.com/sustainability/patagonia",
+              "host": "bettertrail.com"
+            }
+          ],
+          "findings": []
+        },
+        {
+          "claim": "Certified B Corporation",
+          "quote": "As a certified B Corporation and a founding member of 1% for the Planet, the company is recognized internationally for its product quality and environmental activism, as well as its contributions of more than $240 million to environmental organizations.",
+          "url": "https://www.patagoniaworks.com/press/2025/11/11/patagonia-a-work-in-progress",
+          "host": "patagoniaworks.com",
+          "evidence": [
+            {
+              "stance": "backs",
+              "quote": "Patagonia cemented its commitment to environmental and socially responsible practices in 2012 by becoming a Certified B Corporation. The company also adopted benefit corporation legislation to embed purpose in its governance structure.",
+              "url": "https://usca.bcorporation.net/zbtcz9z23zpatagonia-and-b-corp-community-co-create-a-new-model-of-capitalism/",
+              "host": "usca.bcorporation.net"
+            },
+            {
+              "stance": "backs",
+              "quote": "Patagonia Works has been a Certified B Corp since December of 2011, and since then have dedicated themselves to upholding their core values.",
+              "url": "https://career.uconn.edu/blog/2021/06/30/benefit-corporation-spotlight-patagonia/",
+              "host": "career.uconn.edu"
+            }
+          ],
+          "findings": []
+        }
+      ],
+      "removed": {
+        "mismatch": 0,
+        "wrongSite": 0,
+        "banned": 0
+      }
+    },
+    "H&M": {
+      "brand": "H&M",
+      "pagesFound": 8,
+      "pagesRead": 6,
+      "claims": [
+        {
+          "claim": "Committed to clear, accurate, compliant reporting",
+          "quote": "At H&M Group, we are committed to clear, accurate, and compliant reporting on our progress. Transparency remains an essential part of how we share developments in our work and engage with stakeholders.",
+          "url": "https://hmgroup.com/sustainability/sustainability-reporting/",
+          "host": "hmgroup.com",
+          "evidence": [
+            {
+              "stance": "pushes_back",
+              "quote": "H&M has taken note of the concerns raised by the Netherlands Authority for Consumer & Markets (“ACM”) regarding its sustainability communications online in the Netherlands. We acknowledge that the information on sustainability on our website could have been provided more clearly and more comprehensive.",
+              "url": "https://www.esgtoday.com/hm-to-remove-sustainability-labels-from-products-following-investigation-by-regulator/",
+              "host": "esgtoday.com"
+            },
+            {
+              "stance": "pushes_back",
+              "quote": "H&M commits to adjusting or stopping using sustainability claims on its clothing and/or websites. It promises to inform consumers more clearly in order to avoid the risk of misleading consumers about sustainability.",
+              "url": "https://www.acm.nl/en/publications/commitment-decision-handm-regarding-sustainability-claims",
+              "host": "acm.nl"
+            }
+          ],
+          "findings": []
+        },
+        {
+          "claim": "Reduce textile waste with Garment Collecting",
+          "quote": "H&M strives to reduce textile waste – So we initiated Garment Collecting Instead of throwing old or unwanted garments away, you can bring these to the H&M Store. We will then give them a new life.",
+          "url": "https://www.hm.com/om/customer-service/sustainability/sustainability/",
+          "host": "hm.com",
+          "evidence": [],
+          "findings": [
+            {
+              "phrase": "reduce textile waste",
+              "section": "",
+              "verdict": "not_covered",
+              "why": "The Green Guides do not name or clearly describe claims about reducing waste in general. Section 260.4 covers general environmental benefits, but this phrase is more specific than that section's examples.",
+              "quote": ""
+            },
+            {
+              "phrase": "Garment Collecting",
+              "section": "",
+              "verdict": "not_covered",
+              "why": "The Green Guides do not name or clearly describe claims about collecting garments. Section 260.12 covers recyclable claims, but this phrase does not explicitly state the garments will be recycled.",
+              "quote": ""
+            },
+            {
+              "phrase": "give them a new life",
+              "section": "",
+              "verdict": "not_covered",
+              "why": "The Green Guides do not name or clearly describe claims about giving items a 'new life'. Section 260.13 covers recycled content claims, but this phrase does not explicitly state the garments will be made into new products.",
+              "quote": ""
+            }
+          ]
+        },
+        {
+          "claim": "Offer fashion, quality, best prices, sustainability",
+          "quote": "The H&M business concept is to offer fashion and quality at the best prices with sustainability as an added value. We achieve this by buying directly from manufacturers and by having efficient logistics and our own warehouses, not by compromising on our sustainability requirements.",
+          "url": "https://www.hm.com/om/customer-service/sustainability/sustainability/",
+          "host": "hm.com",
+          "evidence": [],
+          "findings": [
+            {
+              "phrase": "sustainability",
+              "section": "260.4",
+              "verdict": "needs_qualification",
+              "why": "The Green Guides say that broad claims like 'sustainability' are hard to interpret and likely convey wide-ranging benefits, which marketers usually cannot substantiate without clear qualifications.",
+              "quote": "Unqualified general environmental benefit claims are difficult to interpret and likely convey a wide range of meanings."
+            }
+          ]
+        }
+      ],
+      "removed": {
+        "mismatch": 0,
+        "wrongSite": 0,
+        "banned": 0
+      }
+    }
+  }
+}
