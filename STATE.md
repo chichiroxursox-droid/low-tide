@@ -97,3 +97,25 @@ Bell was Sat Sept 26 10:00am EDT. If a milestone runs 90 min late, take the next
 - Re-recorded the backup video. A caption said the live claim was "copied off a real package", which wasn't true (I wrote the claim text). It now reads "Now a claim typed in live, checked by Gemini 2.5 Flash."
 - ~/Desktop/low-tide-demo.mp4 is now H.264, 1280x800, 76.9s. All frames checked, no artifacts, footer caption present at the end
 - No app code changed. v1 tag still matches what is deployed
+
+## Brand mode (v2, add-on before the freeze)
+Spec `docs/superpowers/specs/2026-09-26-brand-mode-design.md`, plan `docs/superpowers/plans/2026-09-26-brand-mode.md`. Targets: B1 Sat 4:30pm, B2 Sat 7:00pm, B3 Sat 9:30pm. Rollback line Sat 11:00pm (`git checkout v1 && vercel --prod`).
+
+### Sat 2:28pm, B1
+- Milestone: hit, 2 hours ahead of the 4:30pm target
+- Prod URL works: yes (unchanged v1 until B2)
+- Tests pass: yes, 22/22 (then 25/25 after review fixes)
+- What broke: probes first. Gemini 2.5 Flash rejects tools plus JSON output in one call, and when asked to write source URLs it garbled Google's redirect links (1 of 37 quotes verified). Fixed by design: search call only yields links from the SDK's `sources`, the server fetches the pages, a second call quotes from that text. Probe then verified 15 of 16
+- Notes: `lib/brand.ts` (input parsing, link safety, page reader, `guardBrand`, two Gemini calls, `checkBrand`). Seed: Patagonia 7/8 pages, 3 claims, 6 evidence; H&M 6/8 pages, 3 claims, 2 evidence (both pushback, one from acm.nl, the Dutch consumer regulator). Fixtures are unedited: a reviewer hand-trimmed a clunky Patagonia quote and it was reverted
+- Next step: B2, route and UI on prod
+- Scope cuts so far: none
+
+### Sat 3:01pm, B2
+- Milestone: hit, 4 hours ahead of the 7:00pm target
+- Prod URL works: yes. Playwright on prod at 390 and 1280: claim sample plus tamper test ("1 finding removed"), both brand samples (3 cards each, "checked against these pages on Sep 26, 2026"), live brand Allbirds in 16.0s (3 cards), live link patagonia.com/our-footprint in 27.2s (3 cards, 7 of 9 sources read), brand footer sentence, no horizontal scroll, no console errors
+- Offline proof: removed `GOOGLE_GENERATIVE_AI_API_KEY` from production and redeployed. Both brand samples and claim samples still rendered, tamper test still worked, live brand and live claim showed their offline lines with a 200. Restored the key, redeployed, live claim answered in 2.2s
+- Tests pass: yes, 25/25; tsc, lint, build clean
+- What broke: a three-lens review found 12 issues, all reproduced and fixed with tests: quadratic regexes in `htmlToText` on hostile HTML, trailing-dot hosts (`localhost.`) slipping past the link check, evidence from a second brand-owned host counted as independent, claim labels not softened, charset ignored, "L.L.Bean" parsed as a link, no empty state for a missing Guides reading, two intros stacked in brand mode, placeholder cut off at 390px
+- Notes: live checks lean on the model to say which sites are the brand's own (Allbirds quotes came from allbirds.com.kw and allbirdsbenelux.nl). Guard backs that up with a same-host and subdomain check
+- Next step: B3, README, DEVPOST, CLAUDE.md, video, tag v2
+- Scope cuts so far: none
