@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { verifyQuote, guardFindings, type Finding } from "./guard.ts";
+import { verifyQuote, guardFindings, locateQuote, type Finding } from "./guard.ts";
 import guides from "./guides.json" with { type: "json" };
 
 const text = (s: string) => guides.find((g) => g.section === s)!.text;
@@ -28,6 +28,13 @@ test("a real quote from a different section fails", () => {
 
 test("a quote too short to prove anything fails", () => {
   assert.equal(verifyQuote("It is deceptive", text("260.8")), false);
+});
+
+test("locateQuote finds the original span and its paragraph", () => {
+  const hit = locateQuote("“the entire item will completely break down”", text("260.8"))!;
+  assert.equal(hit.match, "the entire item will completely break down");
+  assert.ok(hit.before.startsWith("(b) A marketer"));
+  assert.ok(hit.after.endsWith("after customary disposal."));
 });
 
 test("guardFindings drops bad quotes, counts them, keeps not_covered", () => {

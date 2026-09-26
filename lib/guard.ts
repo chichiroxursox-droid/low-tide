@@ -23,6 +23,30 @@ export function verifyQuote(quote: string, sectionText: string): boolean {
   return q.split(" ").length >= MIN_WORDS && normalize(sectionText).includes(q);
 }
 
+// Finds a verified quote in the original section text and returns its
+// paragraph split around it, so the UI can highlight it in place.
+export function locateQuote(quote: string, text: string) {
+  const words = normalize(quote)
+    .split(" ")
+    .map((w) =>
+      w
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        .replace(/'/g, "['‘’]")
+        .replace(/"/g, '["“”]')
+        .replace(/-/g, "[-‐-―]"),
+    );
+  const m = new RegExp(words.join("\\s+"), "i").exec(text);
+  if (!m) return null;
+  const start = text.lastIndexOf("\n\n", m.index) + 1; // -1 + 1 = 0 when first paragraph
+  const endBreak = text.indexOf("\n\n", m.index + m[0].length);
+  const end = endBreak === -1 ? text.length : endBreak;
+  return {
+    before: text.slice(start, m.index).trimStart(),
+    match: m[0],
+    after: text.slice(m.index + m[0].length, end),
+  };
+}
+
 // Keeps findings whose quote is really in the section they cite. "not_covered"
 // needs no quote: it is the honest answer when no section applies.
 export function guardFindings(findings: Finding[], guides: Guide[]) {
