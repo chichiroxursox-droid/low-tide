@@ -65,3 +65,12 @@ Bell was Sat Sept 26 10:00am EDT. If a milestone runs 90 min late, take the next
 - Notes: the intro now names Gemini 2.5 Flash as the reader and Low Tide as the quote checker. Each result says "Checked live by Gemini 2.5 Flash" or "Saved answer from Gemini 2.5 Flash, so this sample works offline."
 - Next step: M6, a scripted headless Playwright recording of the demo path on prod, converted to H.264 under 90s at ~/Desktop/low-tide-demo.mp4
 - Scope cuts so far: none
+
+### Sat 12:40pm, M6
+- Milestone: hit, about 9 hours ahead of the 10:00pm target
+- Prod URL works: yes (the video was recorded against it)
+- Tests pass: yes, 7/7
+- What broke: the first recording (old headless shell) left a background-colored unpainted tile over the 260.13 quote after smooth scrolls. Chromium's new headless mode (`channel: "chromium"`) plus a 1px scroll nudge after each scroll fixed it
+- Notes: `~/Desktop/low-tide-demo.mp4`, H.264, 1280x800, 72.8s, 5.6MB. Made by `node scripts/record-demo.mjs` (uses the global Playwright, not a project dependency), then ffmpeg to libx264. Checked every 4s frame: hero, 260.8 highlight, 260.5, ocean plastic not covered, live claim typed and checked (260.4 + 260.13), tamper test, "1 finding removed", footer caption. Captions stand in for narration. Live Gemini output varied between runs even at temperature 0 (a different 260.13 quote), so that goes in the README limitations
+- Next step: M7, README (what it does, how the check works, limitations, AI disclosure)
+- Scope cuts so far: none
