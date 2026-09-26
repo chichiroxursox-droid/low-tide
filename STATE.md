@@ -48,8 +48,8 @@ Bell was Sat Sept 26 10:00am EDT. If a milestone runs 90 min late, take the next
 - Next step: M4, build the page (chips, claim box, verdict cards with highlight, not_covered state, removed line, tamper link, footer)
 - Scope cuts so far: none
 
-### Sat 12:52pm, M4 (GATE)
-- Milestone: hit, about 5 hours ahead of the 6:00pm gate
+### Sat 12:28pm, M4 (GATE)
+- Milestone: hit, about 5.5 hours ahead of the 6:00pm gate
 - Prod URL works: yes. A headless Playwright run on prod covered all 4 chips, the live claim "Eco-friendly cleaner in a bottle made from recycled materials" (260.4 needs qualification plus 260.13 OK if proven), and a tamper test (changed "should" to "may" in the 260.5 quote, card dropped, "1 finding removed: quote didn't match the Guides."). No console errors, no horizontal scroll at 390px
 - Tests pass: yes, 7/7
 - What broke: nothing major. Fixed from screenshots: claim underline breaking at descenders, a highlight padding gap, and the not covered block repeating the model's why
