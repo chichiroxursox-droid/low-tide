@@ -197,10 +197,12 @@ test("parseBrandInput tells brand names from links", () => {
   assert.equal(parseBrandInput("http://127.0.0.1/admin"), null);
 });
 
-test("readPage reads HTML, follows redirects, and skips PDFs, errors, thin and huge pages", async () => {
+test("readPage reads HTML in its declared charset, follows redirects, and skips PDFs, errors, thin and huge pages", async () => {
   const body = `<p>${"Real sentence about recycled fabric in our jackets. ".repeat(20)}</p>`;
+  const cp1252 = Buffer.from(`<p>${"We\x92re cutting emissions across every store we run, starting this year. ".repeat(10)}</p>`, "latin1");
   const server = http.createServer((req, res) => {
     if (req.url === "/page") res.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(body);
+    else if (req.url === "/cp1252") res.writeHead(200, { "content-type": 'text/html; charset="windows-1252"' }).end(cp1252);
     else if (req.url === "/moved") res.writeHead(302, { location: "/page" }).end();
     else if (req.url === "/report.pdf") res.writeHead(200, { "content-type": "application/pdf" }).end("%PDF-1.4 ".repeat(200));
     else if (req.url === "/thin") res.writeHead(200, { "content-type": "text/html" }).end("<p>Too short.</p>");
@@ -214,6 +216,8 @@ test("readPage reads HTML, follows redirects, and skips PDFs, errors, thin and h
     assert.ok(ok?.text.includes("recycled fabric"));
     assert.equal(ok?.host, "127.0.0.1");
     assert.equal((await readPage(`${base}/moved`))?.url, `${base}/page`);
+    const legacy = await readPage(`${base}/cp1252`);
+    assert.equal(verifyQuote("We’re cutting emissions across every store we run, starting this year", legacy?.text ?? ""), true);
     assert.equal(await readPage(`${base}/report.pdf`), null);
     assert.equal(await readPage(`${base}/thin`), null);
     assert.equal(await readPage(`${base}/missing`), null);

@@ -103,7 +103,16 @@ export async function readPage(url: string): Promise<Page | null> {
       size += value.length;
     }
     await reader.cancel().catch(() => {});
-    const raw = Buffer.concat(chunks).toString("utf8");
+    // ponytail: charset from the header only. A page that declares it only in a <meta> tag is read as UTF-8.
+    let decoder: TextDecoder;
+    try {
+      decoder = new TextDecoder(/charset="?([\w-]+)/i.exec(type)?.[1] ?? "utf-8");
+    } catch {
+      decoder = new TextDecoder();
+    }
+    // stream: true keeps Node off its one-shot latin1 fast path, which reads windows-1252 curly quotes and
+    // dashes (0x80-0x9f) as control characters, so quotes containing them would never verify.
+    const raw = decoder.decode(Buffer.concat(chunks), { stream: true });
     const text = (/html/i.test(type) ? htmlToText(raw) : raw.replace(/\s+/g, " ").trim()).slice(0, MAX_CHARS);
     if (text.length < MIN_CHARS) return null;
     const final = new URL(res.url || url);
