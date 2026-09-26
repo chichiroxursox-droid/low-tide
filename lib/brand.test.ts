@@ -3,10 +3,23 @@ import assert from "node:assert/strict";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
 import {
-  htmlToText, isSafeUrl, parseBrandInput, readPage, guardChecks, verdictFor, CHECKS,
+  htmlToText, isSafeUrl, parseBrandInput, readPage, guardChecks, verdictFor, namesBrand, CHECKS,
   type Picked, type SourcePage, type CheckKey, type CheckResult, type Mark,
 } from "./brand.ts";
 import { verifyQuote, BANNED } from "./guard.ts";
+
+test("namesBrand finds the brand as whole words, however the page spells the punctuation", () => {
+  assert.equal(namesBrand("Shop the new line at H&M's flagship", "H&M"), true);
+  assert.equal(namesBrand("H & M Group annual report", "H&M"), true);
+  assert.equal(namesBrand("Which brands are B Corps: H&M & Zara", "h&m"), true);
+  assert.equal(namesBrand("Patagonia's mission statement", "Patagonia"), true);
+  assert.equal(namesBrand("Nestlé said on Monday", "Nestle"), true);
+  assert.equal(namesBrand("The North Face jacket", "North Face"), true);
+  assert.equal(namesBrand("Patagonia Inc. reported", "Patagonia, Inc."), true);
+  assert.equal(namesBrand("L.L.Bean boots", "L.L.Bean"), true);
+  assert.equal(namesBrand("SEC charges QZ Asset Management with misleading claims", "Zqxv Widget Company"), false);
+  assert.equal(namesBrand("an ohm meter reading", "HM"), false);
+});
 
 const page = (id: string, host: string, text: string): SourcePage => ({
   id,

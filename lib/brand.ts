@@ -225,11 +225,11 @@ const pickSchema = z.object({
   ),
 });
 
-const PICK_SYSTEM = `You check whether a brand's sustainability holds up, for a shopper deciding whether to buy from it. You get numbered source pages (S1, S2, ...). Use only what these pages say.
+const PICK_SYSTEM = `You check whether a brand's sustainability holds up, for a shopper deciding whether to buy from it. You get numbered source pages (S1, S2, ...). Use only what these pages say. Every finding must be about the brand named in the prompt: a passage about another company, or about the topic in general, is not a finding.
 
 ownSites: the ids of every source that belongs to the brand itself: its main site, group or corporate site, regional sites, and its own reports.
 checks: one entry for each check below that at least one source speaks to, with up to 2 findings each.
-- certifications: third-party sustainability certifications the brand holds (B Corp, Fair Trade, bluesign, FSC, Cradle to Cradle, GOTS). good if a source confirms a current certification; red if one was lost, suspended, or refused.
+- certifications: third-party sustainability certifications the brand holds (B Corp, Fair Trade, bluesign, FSC, Cradle to Cradle, GOTS). good if a source confirms a current certification; red if one was lost, suspended, or refused. Not holding a certification is not a finding.
 - climate: good if a source shows a climate target validated by the Science Based Targets initiative, or published greenhouse gas emissions; red if a source reports targets missed or dropped, or emissions rising.
 - ratings: independent sustainability ratings (Good On You, CDP, Fashion Transparency Index, or similar). good for a high rating, red for a low one. Quote the passage that states the rating.
 - watchdogs: red if a regulator, consumer authority, or watchdog group acted on or criticized the brand's environmental claims; good only if one explicitly cleared them.
@@ -250,11 +250,25 @@ export async function pickQuotes(brand: string, pages: SourcePage[]): Promise<Pi
   return output;
 }
 
+const SUFFIXES = /\b(inc|co|company|corp|corporation|ltd|llc|plc|group|gmbh)\b\.?/gi;
+// Lowercased words, accents and punctuation stripped. "&" stays a word of its own, so "H&M" and "H & M" match.
+const words = (s: string) => ` ${s.normalize("NFKD").toLowerCase().replace(/&/g, " & ").replace(/[^a-z0-9&]+/g, " ").trim()} `;
+
+// ponytail: whole-word match anywhere on the page, so a name that is also a common word ("Gap") passes most pages;
+// the pick prompt still asks for passages about the brand itself.
+export function namesBrand(text: string, brand: string): boolean {
+  const name = words(brand.replace(SUFFIXES, ""));
+  return name.trim() !== "" && words(text).includes(name);
+}
+
 // The whole brand check. The verdict is left to verdictFor, which the route runs at serve time.
 export async function checkBrand(input: BrandInput): Promise<BrandCheck> {
   const [first, found] = await Promise.all([input.url ? readPage(input.url.href) : null, findSources(input.name)]);
   const read = await Promise.all(found.map(readPage));
-  const pages: SourcePage[] = [first, ...read]
+  // A page that never names the brand can't be evidence about it (a made-up brand otherwise collects generic
+  // pages about other companies). The link the shopper pasted is exempt. For a link, the name is its first label.
+  const name = input.url ? input.name.split(".")[0] : input.name;
+  const pages: SourcePage[] = [first, ...read.filter((p) => p && namesBrand(p.text, name))]
     .filter((p): p is Page => p !== null)
     .filter((p, i, all) => all.findIndex((q) => q.url === p.url) === i)
     .map((p, i) => ({ ...p, id: `S${i + 1}` }));
