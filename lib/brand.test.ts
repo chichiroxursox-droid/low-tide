@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
 import {
-  htmlToText, isSafeUrl, parseBrandInput, readPage, guardChecks, verdictFor, namesBrand, hostNamesBrand, CHECKS,
+  htmlToText, isSafeUrl, parseBrandInput, readPage, guardChecks, verdictFor, namesBrand, hostNamesBrand, ruleName, CHECKS,
   type Picked, type SourcePage, type CheckKey, type CheckResult, type Mark,
 } from "./brand.ts";
 import { verifyQuote, BANNED } from "./guard.ts";
@@ -210,6 +210,24 @@ test("parseBrandInput tells brand names from links", () => {
   assert.equal(link.name, "patagonia.com");
   assert.equal(link.url?.href, "https://www.patagonia.com/our-footprint");
   assert.equal(parseBrandInput("http://127.0.0.1/admin"), null);
+});
+
+test("ruleName names a link or a bare domain by the label its site is registered under", () => {
+  const name = (s: string) => ruleName(parseBrandInput(s)!);
+  assert.equal(name("https://www2.hm.com/en_us/index.html"), "hm");
+  assert.equal(name("https://eu.patagonia.com/gb/en/home/"), "patagonia");
+  assert.equal(name("https://corporate.walmart.com/purpose/sustainability"), "walmart");
+  assert.equal(name("www.coop.co.uk/environment"), "coop");
+  assert.equal(name("https://allbirds.com.kw/"), "allbirds");
+  assert.equal(name("patagonia.com"), "patagonia");
+  assert.equal(name("L.L.Bean"), "L.L.Bean");
+  assert.equal(name("J.Crew"), "J.Crew");
+  assert.equal(name("H&M"), "H&M");
+  assert.equal(namesBrand("Patagonia is a certified B Corp and has been since 2011", name("patagonia.com")), true);
+  // An independent rater whose address starts with the subdomain's word is not the brand's own site.
+  const r = guardChecks(pick({ ratings: [f("good", "S1", RATING)] }), [page("S1", "corporateknights.com", RATING)], name("https://corporate.walmart.com/"));
+  assert.equal(marks(r).ratings, "good");
+  assert.equal(r.removed.wrongSite, 0);
 });
 
 test("readPage reads HTML in its declared charset, follows redirects, and skips PDFs, errors, thin and huge pages", async () => {

@@ -277,13 +277,26 @@ export function hostNamesBrand(host: string, brand: string): boolean {
     });
 }
 
+// The name the source rules match. A link, or a bare domain typed as a name, is named by the label its site is
+// registered under: "www2.hm.com" is "hm", "corporate.walmart.com" is "walmart", "coop.co.uk" is "coop".
+// ponytail: a name counts as a domain when it ends in a 2 or 3 letter part, so "L.L.Bean" and "J.Crew" stay names
+// but "Dr.Oz" would be read as a domain. A site registered under another word ("aboutamazon.com") keeps that word as the name.
+export function ruleName(input: BrandInput): string {
+  const host = input.url?.hostname ?? (/^[\w-]+(\.[\w-]+)*\.[a-z]{2,3}$/i.test(input.name) ? input.name : "");
+  if (!host) return input.name;
+  const labels = host.toLowerCase().replace(/\.+$/, "").split(".");
+  const tld = labels.pop()!;
+  if (tld.length === 2 && labels.length > 1 && /^(co|com|org|net|ac|gov|edu)$/.test(labels.at(-1)!)) labels.pop();
+  return labels.at(-1)!;
+}
+
 // The whole brand check. The verdict is left to verdictFor, which the route runs at serve time.
 export async function checkBrand(input: BrandInput): Promise<BrandCheck> {
   const [first, found] = await Promise.all([input.url ? readPage(input.url.href) : null, findSources(input.name)]);
   const read = await Promise.all(found.map(readPage));
   // A page that never names the brand can't be evidence about it (a made-up brand otherwise collects generic
-  // pages about other companies). The link the shopper pasted is exempt. For a link, the name is its first label.
-  const name = input.url ? input.name.split(".")[0] : input.name;
+  // pages about other companies). The link the shopper pasted is exempt.
+  const name = ruleName(input);
   const pages: SourcePage[] = [first, ...read.filter((p) => p && namesBrand(p.text, name))]
     .filter((p): p is Page => p !== null)
     .filter((p, i, all) => all.findIndex((q) => q.url === p.url) === i)
