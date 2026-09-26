@@ -20,6 +20,8 @@ test("namesBrand finds the brand as whole words, however the page spells the pun
   assert.equal(namesBrand("The North Face jacket", "North Face"), true);
   assert.equal(namesBrand("Patagonia Inc. reported", "Patagonia, Inc."), true);
   assert.equal(namesBrand("L.L.Bean boots", "L.L.Bean"), true);
+  assert.equal(namesBrand("Levi Strauss set a science based target", "Levi Strauss & Co."), true);
+  assert.equal(namesBrand("An op-ed on packaging", "Co-op"), false);
   assert.equal(namesBrand("SEC charges QZ Asset Management with misleading claims", "Zqxv Widget Company"), false);
   assert.equal(namesBrand("an ohm meter reading", "HM"), false);
 });
@@ -83,6 +85,8 @@ test("hostNamesBrand counts a site as the brand's own when its address names the
   assert.equal(hostNamesBrand("thenorthface.com", "North Face"), true);
   assert.equal(hostNamesBrand("allbirds.com.kw", "Allbirds"), true);
   assert.equal(hostNamesBrand("llbean.com", "L.L.Bean"), true);
+  assert.equal(hostNamesBrand("coop.co.uk", "Co-op"), true);
+  assert.equal(hostNamesBrand("openai.com", "Co-op"), false);
 });
 
 test("guardChecks keeps verified findings and marks every check, in order", () => {

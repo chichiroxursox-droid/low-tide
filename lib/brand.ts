@@ -249,7 +249,8 @@ export async function pickQuotes(brand: string, pages: SourcePage[]): Promise<Pi
   return output;
 }
 
-const SUFFIXES = /\b(inc|co|company|corp|corporation|ltd|llc|plc|group|gmbh)\b\.?/gi;
+// A company word at the end of the name only, with the "&" or comma before it: "Levi Strauss & Co." but not "Co-op".
+const SUFFIXES = /[\s,&]*\b(inc|co|company|corp|corporation|ltd|llc|plc|group|gmbh)\b\.?$/i;
 // Lowercased words, accents and punctuation stripped. "&" stays a word of its own, so "H&M" and "H & M" match.
 const words = (s: string) => ` ${s.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().replace(/&/g, " & ").replace(/[^a-z0-9&]+/g, " ").trim()} `;
 
