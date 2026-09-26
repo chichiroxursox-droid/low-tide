@@ -5,7 +5,7 @@
     "Patagonia": {
       "brand": "Patagonia",
       "pagesFound": 12,
-      "pagesRead": 10,
+      "pagesRead": 9,
       "checks": [
         {
           "check": "certifications",
@@ -13,8 +13,16 @@
           "signals": [
             {
               "sign": "good",
-              "quote": "Additionally, Patagonia became a certified B Corp in 2011 and a California Benefit Corporation in 2012. Both designations require companies to include public benefit in their mission and ensure accountability to stakeholders.",
-              "note": "Patagonia has been a certified B Corp since 2011, which means it is committed to public benefit and accountability.",
+              "quote": "Since 2000, Patagonia has worked with Bluesign Technologies , a third-party certification system that ensures textiles and products meet high standards for chemical safety and environmental impact. In 2007, Patagonia became the first brand to join the Bluesign System as a System Partner",
+              "note": "Patagonia has been a Bluesign System Partner since 2007, indicating a commitment to chemical safety and environmental impact standards in its textiles and products.",
+              "url": "https://bettertrail.com/sustainability/patagonia",
+              "host": "bettertrail.com",
+              "own": false
+            },
+            {
+              "sign": "good",
+              "quote": "In 2014, Patagonia began producing Fair Trade Certified (FTC) products and now offers more Fair Trade Certified apparel than any other brand, totalling over 1,000 styles.",
+              "note": "Patagonia offers over 1,000 Fair Trade Certified apparel styles, more than any other brand.",
               "url": "https://bettertrail.com/sustainability/patagonia",
               "host": "bettertrail.com",
               "own": false
@@ -28,15 +36,15 @@
             {
               "sign": "good",
               "quote": "The company has set Science Based Targets Initiative-verified goals aligned with Paris Agreement warming thresholds: reducing Scope 1 and 2 emissions (from owned facilities and purchased electricity) by 80% and Scope 3 emissions (from materials, supply chains, and transportation) by 55% by 2030, compared to a 2017 baseline.",
-              "note": "Patagonia has set Science Based Targets to reduce its greenhouse gas emissions by 2030, which are verified and align with the Paris Agreement.",
+              "note": "Patagonia has set Science Based Targets Initiative-verified goals to reduce its Scope 1 and 2 emissions by 80% and Scope 3 emissions by 55% by 2030, from a 2017 baseline.",
               "url": "https://bettertrail.com/sustainability/patagonia",
               "host": "bettertrail.com",
               "own": false
             },
             {
               "sign": "red",
-              "quote": "Unfortunately, the brand has yet to make progress toward reducing its emissions in line with its science-based targets. Between 2017 and 2025, Patagonia’s total, absolute emissions have increased by approximately 25%, from 145,848 metric tons of carbon dioxide equivalent (tCO2e) to 182,646 tCO2e (equivalent to around 21 million gallons of gasoline).",
-              "note": "Patagonia's total emissions increased by about 25% between 2017 and 2025, indicating it has not yet made progress toward its science-based targets.",
+              "quote": "Between 2017 and 2025, Patagonia’s total, absolute emissions have increased by approximately 25%, from 145,848 metric tons of carbon dioxide equivalent (tCO2e) to 182,646 tCO2e",
+              "note": "Patagonia's total absolute emissions increased by approximately 25% between 2017 and 2025, despite its reduction goals.",
               "url": "https://bettertrail.com/sustainability/patagonia",
               "host": "bettertrail.com",
               "own": false
@@ -49,30 +57,40 @@
           "signals": [
             {
               "sign": "good",
-              "quote": "Outdoorwear brand Patagonia uses lower-impact materials and traces most of its supply chain. Patagonia sustainability rating Planet 4 out of 5 People 4 out of 5 Animals 4 out of 5 Overall rating: Good",
-              "note": "Good On You rates Patagonia as 'Good' overall for its sustainability, with scores of 4 out of 5 for Planet, People, and Animals.",
+              "quote": "Overall rating: Good Our ratings are based on a scale from 1 (We avoid) to 5 (Great) How we rate Our “Planet” rating evaluates brands based on the environmental policies in their supply chains, from carbon emissions and wastewater to business models and product circularity. Here we rate Patagonia “Good”.",
+              "note": "Good On You rates Patagonia as 'Good' overall and for its environmental policies.",
               "url": "https://directory.goodonyou.eco/brand/patagonia",
               "host": "directory.goodonyou.eco",
               "own": false
             },
             {
               "sign": "good",
-              "quote": "They hold an overall B impact score of 151 – which is about 3 times the average score of an ordinary business, and almost twice the minimum score to qualify as a Certified Benefit Corporation.",
-              "note": "Patagonia has a B Impact score of 151, which is significantly higher than the average business and well above the minimum for B Corp certification.",
-              "url": "https://career.uconn.edu/blog/2021/06/30/benefit-corporation-spotlight-patagonia/",
-              "host": "career.uconn.edu",
+              "quote": "Its most recent B Impact score was 166 out of more than 250 possible points—well above the 80-point certification threshold and the median score of 51 for typical businesses.",
+              "note": "Patagonia achieved a B Impact score of 166, significantly higher than the 80-point certification threshold and the median business score of 51.",
+              "url": "https://bettertrail.com/sustainability/patagonia",
+              "host": "bettertrail.com",
               "own": false
             }
           ]
         },
         {
           "check": "watchdogs",
-          "mark": "not_found",
-          "signals": []
+          "mark": "red",
+          "signals": [
+            {
+              "sign": "red",
+              "quote": "The company hired Patagonia understood this at a cost by receiving a complaint for greenwashing accepted by the advertising ethics jury in France. Clothing made from recycled materials “that protect the oceans”",
+              "note": "Patagonia received a complaint for greenwashing, accepted by the advertising ethics jury in France, regarding claims that its recycled clothing protects the oceans.",
+              "url": "https://www.giveactions.com/en/post/meme-les-marques-engagees-peuvent-tomber-dans-le-piege-du-greenwashing",
+              "host": "giveactions.com",
+              "own": false
+            }
+          ]
         }
       ],
       "removed": {
-        "mismatch": 2,
+        "mismatch": 0,
+        "offCheck": 0,
         "wrongSite": 0,
         "banned": 0
       }
@@ -84,25 +102,8 @@
       "checks": [
         {
           "check": "certifications",
-          "mark": "red",
-          "signals": [
-            {
-              "sign": "red",
-              "quote": "Ranking in the top three leading global companies were Nike, BrewDog and H&M, all of which had under 100,000 metric tonnes of greenhouse gas emissions per year. However, of the three, BrewDog is the only company with a B Corp certification.",
-              "note": "H&M does not have a B Corp certification, unlike some other companies on a list of eco-conscious brands.",
-              "url": "https://www.challengepackaging.co.uk/blog/most-eco-conscious-companies-2/",
-              "host": "challengepackaging.co.uk",
-              "own": false
-            },
-            {
-              "sign": "red",
-              "quote": "Which fashion brands are certified as B - corporations: H&M & Zara Eileen Fisher & Patagonia Gucci & Armani All answers are correct Here’s the best way to solve it.",
-              "note": "H&M is not certified as a B-corporation.",
-              "url": "https://www.chegg.com/homework-help/questions-and-answers/fashion-brands-certified-b-corporations-h-m-zara-eileen-fisher-patagonia-gucci-armani-answ-q124379964",
-              "host": "chegg.com",
-              "own": false
-            }
-          ]
+          "mark": "not_found",
+          "signals": []
         },
         {
           "check": "climate",
@@ -111,34 +112,25 @@
             {
               "sign": "good",
               "quote": "Our climate targets have been validated by the Science Based Targets initiative (SBTi) , an independent organisation that assesses whether corporate emissions-reduction targets are aligned with climate science.",
-              "note": "H&M Group's climate targets have been validated by the Science Based Targets initiative.",
+              "note": "H&M Group's climate targets have been validated by the Science Based Targets initiative (SBTi).",
               "url": "https://hmgroup.com/sustainability/circularity-and-climate/climate/",
               "host": "hmgroup.com",
               "own": true
             },
             {
               "sign": "good",
-              "quote": "In 2023, H&M Group reported a total of 8,586,805 ton CO₂e, and a net revenue of 22,258 M USD, resulting in a emissions intensity of 386 t CO₂e / M USD.",
-              "note": "H&M Group reported its total greenhouse gas emissions for 2023.",
-              "url": "https://www.opensustainabilityindex.org/company/handm",
-              "host": "opensustainabilityindex.org",
-              "own": false
+              "quote": "In our 2025 annual and sustainability report , we reported a 41 percent reduction in Scope 1 and 2 greenhouse gas emissions compared with 2019, our baseline year. This reduction was mainly linked to increased purchasing of renewable electricity.",
+              "note": "H&M Group reported a 41% reduction in Scope 1 and 2 greenhouse gas emissions by 2025 compared to 2019, largely due to increased renewable electricity purchases.",
+              "url": "https://hmgroup.com/sustainability/circularity-and-climate/climate/",
+              "host": "hmgroup.com",
+              "own": true
             }
           ]
         },
         {
           "check": "ratings",
-          "mark": "red",
-          "signals": [
-            {
-              "sign": "red",
-              "quote": "Based on all publicly available information we’ve reviewed, we rate H&M “It's a Start” overall.",
-              "note": "Good On You rates H&M as 'It's a Start' overall for sustainability.",
-              "url": "https://directory.goodonyou.eco/brand/h-and-m",
-              "host": "directory.goodonyou.eco",
-              "own": false
-            }
-          ]
+          "mark": "not_found",
+          "signals": []
         },
         {
           "check": "watchdogs",
@@ -146,16 +138,16 @@
           "signals": [
             {
               "sign": "red",
-              "quote": "H&M Norway has been called out for “greenwashing” following an investigation into its Conscious Collection conducted by the Norwegian Consumer Authority (CA) .",
-              "note": "The Norwegian Consumer Authority criticized H&M for potentially misleading marketing of its Conscious Collection.",
+              "quote": "H&M Norway has been called out for “greenwashing” following an investigation into its Conscious Collection conducted by the Norwegian Consumer Authority (CA) . The Swedish clothing giant was criticized for potentially “ misleading ” marketing ploys, as the CA says H&M provides “insufficient” information about the sustainability of the collection.",
+              "note": "The Norwegian Consumer Authority criticized H&M for potentially misleading marketing of its Conscious Collection, stating it provided insufficient information about its sustainability.",
               "url": "https://hypebeast.com/2019/8/h-m-conscious-collection-greenwashing-sustainability-norwegian-consumer-authority",
               "host": "hypebeast.com",
               "own": false
             },
             {
               "sign": "red",
-              "quote": "Back in 2019 Norway’s Forbrukertilsynet (Consumer Authority) revealed that they were investigating fast fashion giant H&M’s sustainability claims.",
-              "note": "Norway's Consumer Authority investigated H&M's sustainability claims for its Conscious Collection.",
+              "quote": "Their investigation came under the Marketing Control Act in Norway , Section 2 of which states that marketing cannot contain ‘an incorrect or otherwise misleading representation which is likely to influence the demand for or supply of goods’.",
+              "note": "Norway's Consumer Authority investigated H&M's sustainability claims under a law that prohibits misleading marketing.",
               "url": "https://tabithawhiting.com/2024/02/23/hms-conscious-collection/",
               "host": "tabithawhiting.com",
               "own": false
@@ -165,7 +157,8 @@
       ],
       "removed": {
         "mismatch": 0,
-        "wrongSite": 1,
+        "offCheck": 1,
+        "wrongSite": 2,
         "banned": 0
       }
     }
