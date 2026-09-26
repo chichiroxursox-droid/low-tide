@@ -9,7 +9,7 @@
       "claims": [
         {
           "claim": "Business to save our home planet",
-          "quote": "We're in business to save our home planet.",
+          "quote": "Patagonia’s Mission Statement We're in business to save our home planet. We're in business to save our home planet. Our Reason For Being At Patagonia, we appreciate that all life on earth is under threat of extinction.",
           "url": "https://www.patagonia.com.hk/pages/our-mission",
           "host": "patagonia.com.hk",
           "evidence": [
@@ -33,6 +33,13 @@
               "verdict": "needs_qualification",
               "why": "The Green Guides say that broad claims like 'save our home planet' are difficult to interpret and likely convey far-reaching environmental benefits, which are hard to substantiate without qualification.",
               "quote": "Unqualified general environmental benefit claims are difficult to interpret and likely convey a wide range of meanings. In many cases, such claims likely convey that the product, package, or service has specific and far-reaching environmental benefits"
+            },
+            {
+              "phrase": "all life on earth is under threat of extinction",
+              "section": "",
+              "verdict": "not_covered",
+              "why": "The Green Guides do not cover general statements about the state of the planet or threats to life on Earth. They focus on specific environmental attributes of products or services.",
+              "quote": ""
             }
           ]
         },
