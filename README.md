@@ -108,7 +108,7 @@ The backup demo video comes from `node scripts/record-demo.mjs <url> <outDir>`, 
 ## Limitations
 
 - **Six sections only.** Claims covered by other parts of the Guides (certifications and seals, free-of, non-toxic, renewable energy and materials, and others) will come back as not covered, even though the full Guides address them.
-- **A real quote is not a right answer.** The guard proves the quote exists in the section Gemini cited. It does not prove the quote supports the verdict, or that Gemini picked the best section. In brand mode, a verified quote proves the page says it, not that the page is right, is current, or sits under the right check.
+- **A real quote is not a right answer.** The guard proves the quote exists in the section Gemini cited. It does not prove the quote supports the verdict, or that Gemini picked the best section. In brand mode, a verified quote proves the page says it, not that the page is right, is current, sits under the right check, or carries the right sign. Gemini decides whether each quote is a good sign or a red flag. The prompt says a middle rating is not a finding, yet in one live check Gemini still marked Good On You's middle rating, "It's a Start", as a red flag (that check had a second, correct red flag from the same rater, so its mark didn't change).
 - **Phrase finding is up to the model.** Gemini can miss a phrase, merge two, or split one.
 - **Live answers can vary.** Even at temperature 0, the same live claim returned a different (still verified) quote on a second run. The samples are fixed.
 - **Matching is forgiving on typography.** Case, quote style, dash style and spacing are ignored. A quote that differs only in those ways passes.
