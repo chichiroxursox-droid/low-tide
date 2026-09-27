@@ -103,7 +103,8 @@ await caption("Tamper test: change one word in a real quote and send it back thr
 await wait(3500);
 await tamperBtn.click();
 await page.getByText("1 finding removed").waitFor();
-await scrollTo(page.getByText("1 finding removed"));
+// Show the pulled row itself: flag lowered, the swapped word struck through.
+await scrollTo(results.getByText("Finding removed: this quote no longer"));
 await caption("One word off and the finding is removed. No verified quote, no verdict.");
 await wait(6500);
 

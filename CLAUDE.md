@@ -12,7 +12,7 @@ AI SDK v7 has no `generateObject`. Structured output goes through `generateText(
 Brand mode searches with `google.tools.googleSearch`, which ships in `@ai-sdk/google`, so no new dependency. Gemini 2.5 Flash rejects a tool and structured output in the same call, so search and structured output are two separate calls.
 
 ## Files
-- `app/page.tsx`: claim/brand mode switch, claim input and sample chips, verdict cards, brand input and sample chips, brand verdict (heading, verdict pill, rule line, four check cards, removed line), footer
+- `app/page.tsx`: the lifeguard board (see DESIGN.md): red stencil header with the "What the flags mean" sign, claim/brand tabs, entry strip and sample plaques, claim finding rows with flags and the tamper test (a pulled row stays, flag lowered, swapped word struck through), the brand verdict on a flag pole with four check rows, the tide loader for live checks, footer
 - `app/api/check/route.ts`: one Gemini call, then the guard. Returns JSON on every path, never a 500
 - `lib/guides.json`: Green Guides sections from eCFR, shape `{ section, title, text, url }`. Scope: 260.4, 260.5, 260.7, 260.8, 260.12, 260.13
 - `lib/guard.ts`: `verifyQuote(quote, sectionText)`, a pure normalized substring check (whitespace, curly quotes, dash variants)
@@ -20,7 +20,7 @@ Brand mode searches with `google.tools.googleSearch`, which ships in `@ai-sdk/go
 - `fixtures/`: saved Gemini output for the sample claims. Samples are served from here, so the app works with no API key
 - `lib/brand.ts`: brand pipeline: input parsing, `isSafeUrl`, `readPage`, `namesBrand`, `hostNamesBrand`, `ruleName`, the four searches (`findSources`), the pick call (`pickQuotes`), `guardChecks`, `verdictFor`, `checkBrand`
 - `lib/brand.test.ts`: `node --test` cases for `htmlToText`, `isSafeUrl`, `parseBrandInput`, `readPage`, `namesBrand`, `hostNamesBrand`, `ruleName`, every `guardChecks` source rule and mark, and every `verdictFor` branch
-- `app/api/brand/route.ts`: brand samples, live brand check, offline line, "Couldn't find enough" line, verdict from `verdictFor` at serve time. Returns JSON on every path, never a 500
+- `app/api/brand/route.ts`: brand samples, live brand check, offline line, "Couldn't find enough" line, verdict from `verdictFor` at serve time. Samples and errors return JSON; a live brand check streams NDJSON (one `stage` line per real step from `checkBrand`, then one `result` line) so the tide loader shows real progress. Never a 500
 - `fixtures/brands.json`: saved brand checks for Patagonia (Mixed record) and H&M (Red flags), guarded at seed time and unedited, so brand samples work with no API key. No verdict is saved; the route computes it
 - `scripts/seed-brands.ts`: runs the live brand pipeline and writes `fixtures/brands.json`
 

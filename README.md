@@ -123,7 +123,7 @@ The backup demo video comes from `node scripts/record-demo.mjs <url> <outDir>`, 
 - **Patagonia's red flag reads badly.** Its only red flag quotes a machine-translated page, clumsy English included ("The company hired Patagonia understood this at a cost"). It is verbatim, because an edited quote would no longer be checked word for word.
 - **Link safety checks the hostname only.** Links to IP addresses, localhost and internal names are refused, but a public name that points to a private address, or redirects to one, would still be fetched. Vercel functions have no private network to reach.
 - **Charset comes from the response header only.** A page that declares its encoding only in a `<meta>` tag is read as UTF-8, so its curly quotes and accented letters can come out garbled.
-- **Brand checks are slow.** A live brand check takes about 15 to 20 seconds: four searches, up to 13 page downloads, then the pick call.
+- **Brand checks are slow.** A live brand check takes about 15 to 20 seconds: four searches, up to 13 page downloads, then the pick call. The wait is shown as it happens: the route streams each real step (searches finished, pages read, pages that name the brand, quotes picked, quotes checked) and the loading screen drains a tide staff one mark per step.
 - **No rate limiting** on the live endpoints. Claims are capped at 500 characters, brand input at 300.
 - **Not legal advice.** Low Tide is a reading of published guidance and public evidence. It never tells you a claim or a brand breaks the law.
 
