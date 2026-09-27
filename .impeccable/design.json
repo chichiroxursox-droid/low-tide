@@ -1,0 +1,381 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-27T01:30:15Z",
+  "title": "Design System: Low Tide",
+  "extensions": {
+    "colorMeta": {
+      "rescue": {
+        "role": "primary",
+        "displayName": "Rescue Red",
+        "canonical": "oklch(56.9% 0.207 29.4)",
+        "tonalRamp": [
+          "oklch(15% 0.207 29.4)",
+          "oklch(26% 0.207 29.4)",
+          "oklch(38% 0.207 29.4)",
+          "oklch(50% 0.207 29.4)",
+          "oklch(62% 0.207 29.4)",
+          "oklch(74% 0.207 29.4)",
+          "oklch(85% 0.207 29.4)",
+          "oklch(95% 0.207 29.4)"
+        ]
+      },
+      "rescue-edge": {
+        "role": "primary",
+        "displayName": "Rescue Edge",
+        "canonical": "oklch(46.8% 0.172 29.3)",
+        "tonalRamp": [
+          "oklch(15% 0.172 29.3)",
+          "oklch(26% 0.172 29.3)",
+          "oklch(38% 0.172 29.3)",
+          "oklch(50% 0.172 29.3)",
+          "oklch(62% 0.172 29.3)",
+          "oklch(74% 0.172 29.3)",
+          "oklch(85% 0.172 29.3)",
+          "oklch(95% 0.172 29.3)"
+        ]
+      },
+      "flag-yellow": {
+        "role": "secondary",
+        "displayName": "Flag Yellow",
+        "canonical": "oklch(84.1% 0.172 90.0)",
+        "tonalRamp": [
+          "oklch(15% 0.172 90.0)",
+          "oklch(26% 0.172 90.0)",
+          "oklch(38% 0.172 90.0)",
+          "oklch(50% 0.172 90.0)",
+          "oklch(62% 0.172 90.0)",
+          "oklch(74% 0.172 90.0)",
+          "oklch(85% 0.172 90.0)",
+          "oklch(95% 0.172 90.0)"
+        ]
+      },
+      "flag-green": {
+        "role": "secondary",
+        "displayName": "Flag Green",
+        "canonical": "oklch(51.0% 0.109 155.3)",
+        "tonalRamp": [
+          "oklch(15% 0.109 155.3)",
+          "oklch(26% 0.109 155.3)",
+          "oklch(38% 0.109 155.3)",
+          "oklch(50% 0.109 155.3)",
+          "oklch(62% 0.109 155.3)",
+          "oklch(74% 0.109 155.3)",
+          "oklch(85% 0.109 155.3)",
+          "oklch(95% 0.109 155.3)"
+        ]
+      },
+      "mark": {
+        "role": "tertiary",
+        "displayName": "Highlighter",
+        "canonical": "oklch(91.2% 0.127 96.1)",
+        "tonalRamp": [
+          "oklch(15% 0.127 96.1)",
+          "oklch(26% 0.127 96.1)",
+          "oklch(38% 0.127 96.1)",
+          "oklch(50% 0.127 96.1)",
+          "oklch(62% 0.127 96.1)",
+          "oklch(74% 0.127 96.1)",
+          "oklch(85% 0.127 96.1)",
+          "oklch(95% 0.127 96.1)"
+        ]
+      },
+      "water": {
+        "role": "neutral",
+        "displayName": "Deep-Water Ink",
+        "canonical": "oklch(29.9% 0.040 231.9)",
+        "tonalRamp": [
+          "oklch(15% 0.040 231.9)",
+          "oklch(26% 0.040 231.9)",
+          "oklch(38% 0.040 231.9)",
+          "oklch(50% 0.040 231.9)",
+          "oklch(62% 0.040 231.9)",
+          "oklch(74% 0.040 231.9)",
+          "oklch(85% 0.040 231.9)",
+          "oklch(95% 0.040 231.9)"
+        ]
+      },
+      "board": {
+        "role": "neutral",
+        "displayName": "Board White",
+        "canonical": "oklch(100.0% 0.000 0.0)",
+        "tonalRamp": [
+          "oklch(15% 0.000 0.0)",
+          "oklch(26% 0.000 0.0)",
+          "oklch(38% 0.000 0.0)",
+          "oklch(50% 0.000 0.0)",
+          "oklch(62% 0.000 0.0)",
+          "oklch(74% 0.000 0.0)",
+          "oklch(85% 0.000 0.0)",
+          "oklch(95% 0.000 0.0)"
+        ]
+      },
+      "haze": {
+        "role": "neutral",
+        "displayName": "Haze",
+        "canonical": "oklch(94.9% 0.006 211.0)",
+        "tonalRamp": [
+          "oklch(15% 0.006 211.0)",
+          "oklch(26% 0.006 211.0)",
+          "oklch(38% 0.006 211.0)",
+          "oklch(50% 0.006 211.0)",
+          "oklch(62% 0.006 211.0)",
+          "oklch(74% 0.006 211.0)",
+          "oklch(85% 0.006 211.0)",
+          "oklch(95% 0.006 211.0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "LOW TIDE on the red board. Once per page."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The brand question; 3.75rem from 640px."
+      },
+      "verdict": {
+        "displayName": "Verdict",
+        "purpose": "The brand verdict label beside the pole, in ink."
+      },
+      "plaque": {
+        "displayName": "Plaque",
+        "purpose": "CHECK plaque label and the tide loader title."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "A board row's verdict label or check name."
+      },
+      "tab": {
+        "displayName": "Tab",
+        "purpose": "Mode tabs and the legend sign title."
+      },
+      "claim-echo": {
+        "displayName": "Claim echo",
+        "purpose": "The checked claim above the findings; 2.6rem from 640px, max 40ch."
+      },
+      "quote": {
+        "displayName": "Quote",
+        "purpose": "Every verbatim source passage, max 68ch."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "The board's plain line, a finding's phrase, idle and error text."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Explanations under findings and evidence, max 65ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Plaques, captions, source links, sub-labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "highlighter-bleed",
+        "value": "0 0 0 2px var(--color-mark)",
+        "purpose": "Spread of the highlighter past letter edges on verbatim quotes. Not elevation; the system has no shadows."
+      }
+    ],
+    "motion": [
+      {
+        "name": "hoist",
+        "value": "1100ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "A flag rising on arrival: 118px on the verdict pole, 15px on row flags staggered 180ms."
+      },
+      {
+        "name": "lower",
+        "value": "800ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "A pulled finding's cloth drops 14px and fades, leaving the dashed outline."
+      },
+      {
+        "name": "tide-drift",
+        "value": "7s linear infinite",
+        "purpose": "The surf edge drifting over the first wet loader row."
+      },
+      {
+        "name": "tide-pulse",
+        "value": "1.4s ease-in-out infinite",
+        "purpose": "The flag-yellow marker on the running loader step, scaling to 0.6."
+      },
+      {
+        "name": "tideline",
+        "value": "900ms ease-out",
+        "purpose": "The waterline under the entry strip drawing itself in."
+      },
+      {
+        "name": "drain",
+        "value": "700ms",
+        "purpose": "A loader row's colors crossing from deep water to haze when its step finishes."
+      },
+      {
+        "name": "plaque",
+        "value": "150ms",
+        "purpose": "Plaque and tab color floods on hover; the CHECK plaque's 2px press."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "All animation off; a lowered flag's cloth is simply hidden."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "CHECK Plaque",
+      "kind": "button",
+      "refersTo": "button-check",
+      "description": "The one red action on the page: runs the check. Square, white stencil caps, presses down 2px.",
+      "html": "<button class='ds-check' type='button'>Check claim</button>",
+      "css": ".ds-check { background: var(--color-rescue, #d62b1f); color: var(--color-board, #ffffff); font-family: var(--font-stencil, 'Big Shoulders Stencil', sans-serif); font-size: 1.5rem; font-weight: 800; line-height: 1.33; letter-spacing: 0.02em; text-transform: uppercase; padding: 12px 28px; border: 0; border-radius: 0; cursor: pointer; transition: transform 150ms, background-color 150ms; } .ds-check:hover { background: var(--color-rescue-edge, #a51e15); } .ds-check:active { transform: translateY(2px); } .ds-check:focus-visible { outline: 3px solid var(--color-water, #17313e); outline-offset: 3px; } .ds-check:disabled { background: var(--color-rescue-edge, #a51e15); }"
+    },
+    {
+      "name": "Sample Plaque",
+      "kind": "chip",
+      "refersTo": "button-plaque",
+      "description": "Sample claims and brands, and the tamper test. White plaque, 2px ink border, floods ink on hover.",
+      "html": "<button class='ds-plaque' type='button'>Biodegradable plastic bag</button>",
+      "css": ".ds-plaque { background: transparent; color: var(--color-water, #17313e); font-family: var(--font-sans, 'Atkinson Hyperlegible Next', sans-serif); font-size: 0.875rem; font-weight: 700; padding: 6px 12px; border: 2px solid var(--color-water, #17313e); border-radius: 3px; cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-plaque:hover { background: var(--color-water, #17313e); color: var(--color-board, #ffffff); } .ds-plaque:focus-visible { outline: 3px solid var(--color-water, #17313e); outline-offset: 3px; } .ds-plaque:disabled { opacity: 0.4; background: transparent; color: var(--color-water, #17313e); }"
+    },
+    {
+      "name": "Mode Tabs",
+      "kind": "nav",
+      "refersTo": "tab-active",
+      "description": "Claim and brand tabs cut into the red board's lower edge; the active tab is continuous with the white entry strip.",
+      "html": "<div class='ds-tabs' role='group' aria-label='What to check'><button class='ds-tab' type='button' aria-pressed='true'>A claim</button><button class='ds-tab' type='button' aria-pressed='false'>A brand</button></div>",
+      "css": ".ds-tabs { display: flex; gap: 6px; background: var(--color-rescue, #d62b1f); padding: 24px 20px 0; } .ds-tab { font-family: var(--font-stencil, 'Big Shoulders Stencil', sans-serif); font-size: 1.25rem; font-weight: 800; line-height: 1.4; letter-spacing: 0.02em; text-transform: uppercase; padding: 10px 28px 8px; border: 0; border-radius: 4px 4px 0 0; cursor: pointer; transition: background-color 150ms; } .ds-tab[aria-pressed='true'] { background: var(--color-board, #ffffff); color: var(--color-water, #17313e); } .ds-tab[aria-pressed='false'] { background: var(--color-rescue-edge, #a51e15); color: var(--color-board, #ffffff); } .ds-tab[aria-pressed='false']:hover { background: #8e1811; } .ds-tab:focus-visible { outline: 3px solid var(--color-water, #17313e); outline-offset: 3px; }"
+    },
+    {
+      "name": "Entry Field",
+      "kind": "input",
+      "refersTo": "input-entry",
+      "description": "The white entry strip. Focus turns the border rescue red inside the ink focus ring.",
+      "html": "<textarea class='ds-field' rows='3' aria-label='Green claim' placeholder='Paste a claim, like: Plant-based bottle, 100% compostable'></textarea>",
+      "css": ".ds-field { width: 100%; background: var(--color-board, #ffffff); color: var(--color-water, #17313e); font-family: var(--font-sans, 'Atkinson Hyperlegible Next', sans-serif); font-size: 1.125rem; padding: 16px; border: 2px solid var(--color-water, #17313e); border-radius: 3px; resize: vertical; } .ds-field::placeholder { color: rgb(23 49 62 / 0.75); } .ds-field:focus { border-color: var(--color-rescue, #d62b1f); } .ds-field:focus-visible { outline: 3px solid var(--color-water, #17313e); outline-offset: 3px; }"
+    },
+    {
+      "name": "Finding Row",
+      "kind": "card",
+      "refersTo": "board-row",
+      "description": "A claim-mode board row: flag and ink stencil verdict, the phrase, the why, and the Green Guides passage on the haze plate with the verified quote highlighted.",
+      "html": "<article class='ds-row'><div class='ds-head'><svg viewBox='0 0 20 24' width='32' height='40' aria-hidden='true' style='overflow:visible;flex-shrink:0'><path d='M3.2 2v20.5' stroke='#17313e' stroke-width='1.6' stroke-linecap='round'/><path d='M4 3.5c4-1.6 8 1.6 14 0v9c-6 1.6-10-1.6-14 0z' fill='#f6c400' stroke='#17313e' stroke-width='0.7'/></svg><h3 class='ds-title'>Needs qualification</h3></div><div><p class='ds-phrase'>&ldquo;Biodegradable plastic bag&rdquo;</p><p class='ds-why'>The Green Guides say an unqualified biodegradable claim for items entering the solid waste stream is deceptive if the items do not completely decompose within one year after customary disposal.</p><figure class='ds-plate'><blockquote class='ds-quote'>(c) <mark class='ds-mark'>It is deceptive to make an unqualified degradable claim for items entering the solid waste stream if the items do not completely decompose within one year after customary disposal.</mark> Unqualified degradable claims for items that are customarily disposed in landfills, incinerators, and recycling facilities are deceptive because these locations do not present conditions in which complete decomposition ...</blockquote><figcaption class='ds-cap'><a href='https://www.ecfr.gov/current/title-16/part-260/section-260.8'>&sect; 260.8 Degradable claims</a><span>Quote checked word for word</span></figcaption></figure></div></article>",
+      "css": ".ds-row { display: grid; gap: 16px 40px; grid-template-columns: 13.5rem 1fr; border-top: 2px solid var(--color-water, #17313e); padding: 32px 0; color: var(--color-water, #17313e); background: var(--color-board, #ffffff); font-family: var(--font-sans, 'Atkinson Hyperlegible Next', sans-serif); } .ds-head { display: flex; flex-direction: column; gap: 10px; } .ds-title { margin: 0; font-family: var(--font-stencil, 'Big Shoulders Stencil', sans-serif); font-size: 1.35rem; font-weight: 800; line-height: 1.05; letter-spacing: 0.01em; text-transform: uppercase; } .ds-phrase { margin: 0; font-size: 1.125rem; font-weight: 700; } .ds-why { margin: 8px 0 0; max-width: 65ch; line-height: 1.625; } .ds-plate { margin: 20px 0 0; background: var(--color-haze, #eaeff0); border-radius: 3px; padding: 24px; } .ds-quote { margin: 0; max-width: 68ch; font-family: var(--font-serif, 'Source Serif 4', Georgia, serif); font-size: 1.1rem; line-height: 1.7; } .ds-mark { background: var(--color-mark, #fbe27a); color: var(--color-water, #17313e); box-decoration-break: clone; -webkit-box-decoration-break: clone; box-shadow: 0 0 0 2px var(--color-mark, #fbe27a); } .ds-cap { margin-top: 12px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; font-size: 0.875rem; } .ds-cap a { color: inherit; font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; } .ds-cap span { opacity: 0.7; } .ds-cap a:focus-visible { outline: 3px solid var(--color-water, #17313e); outline-offset: 3px; }"
+    },
+    {
+      "name": "Pulled Finding",
+      "kind": "custom",
+      "refersTo": "board-row",
+      "description": "The tamper test's result: the row stays, the flag is lowered to a dashed outline, the swapped word is struck through in red, and Finding removed replaces the verdict label.",
+      "html": "<article class='ds-row'><div class='ds-head'><svg viewBox='0 0 20 24' width='32' height='40' aria-hidden='true' style='overflow:visible;flex-shrink:0'><path d='M3.2 2v20.5' stroke='#17313e' stroke-width='1.6' stroke-linecap='round'/><path d='M4 3.5c4-1.6 8 1.6 14 0v9c-6 1.6-10-1.6-14 0z' fill='none' stroke='#17313e' stroke-width='1.1' stroke-dasharray='2 1.6'/></svg><h3 class='ds-title'>Finding removed</h3></div><div><p class='ds-pulled'>Finding removed: this quote no longer matches &sect; 260.8 word for word.</p><p class='ds-phrase'>&ldquo;Biodegradable plastic bag&rdquo;</p><figure class='ds-plate'><blockquote class='ds-quote'>(c) It is deceptive to make an unqualified degradable claim for items entering the solid waste stream if the items do <s class='ds-from'>not</s> <span class='ds-to'>always</span> completely decompose within one year after customary disposal. Unqualified degradable claims for items that are customarily disposed in landfills, incinerators, and recycling facilities are deceptive because these locations do not present conditions in which complete decomposition ...</blockquote><figcaption class='ds-cap'><a href='https://www.ecfr.gov/current/title-16/part-260/section-260.8'>&sect; 260.8 Degradable claims</a><span class='ds-fail'>Edited quote failed the word for word check</span></figcaption></figure></div></article>",
+      "css": ".ds-row { display: grid; gap: 16px 40px; grid-template-columns: 13.5rem 1fr; border-top: 2px solid var(--color-water, #17313e); padding: 32px 0; color: var(--color-water, #17313e); background: var(--color-board, #ffffff); font-family: var(--font-sans, 'Atkinson Hyperlegible Next', sans-serif); } .ds-head { display: flex; flex-direction: column; gap: 10px; } .ds-title { margin: 0; font-family: var(--font-stencil, 'Big Shoulders Stencil', sans-serif); font-size: 1.35rem; font-weight: 800; line-height: 1.05; letter-spacing: 0.01em; text-transform: uppercase; } .ds-phrase { margin: 0; font-size: 1.125rem; font-weight: 700; } .ds-why { margin: 8px 0 0; max-width: 65ch; line-height: 1.625; } .ds-plate { margin: 20px 0 0; background: var(--color-haze, #eaeff0); border-radius: 3px; padding: 24px; } .ds-quote { margin: 0; max-width: 68ch; font-family: var(--font-serif, 'Source Serif 4', Georgia, serif); font-size: 1.1rem; line-height: 1.7; } .ds-mark { background: var(--color-mark, #fbe27a); color: var(--color-water, #17313e); box-decoration-break: clone; -webkit-box-decoration-break: clone; box-shadow: 0 0 0 2px var(--color-mark, #fbe27a); } .ds-cap { margin-top: 12px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; font-size: 0.875rem; } .ds-cap a { color: inherit; font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; } .ds-cap span { opacity: 0.7; } .ds-cap a:focus-visible { outline: 3px solid var(--color-water, #17313e); outline-offset: 3px; } .ds-pulled { margin: 0 0 12px; font-weight: 700; color: var(--color-rescue, #d62b1f); } .ds-from { text-decoration-color: var(--color-rescue, #d62b1f); text-decoration-thickness: 2px; } .ds-to { font-weight: 700; color: var(--color-rescue, #d62b1f); } .ds-cap .ds-fail { opacity: 1; font-weight: 700; color: var(--color-rescue, #d62b1f); }"
+    },
+    {
+      "name": "Flag Legend Sign",
+      "kind": "custom",
+      "refersTo": "flag-legend",
+      "description": "Desktop-only white sign on the red board: one flag per verdict for the current mode.",
+      "html": "<div class='ds-legend-board'><aside class='ds-legend'><h2>What the flags mean</h2><ul><li><svg viewBox='0 0 20 24' width='28' height='32' aria-hidden='true' style='overflow:visible;flex-shrink:0'><path d='M3.2 2v20.5' stroke='#17313e' stroke-width='1.6' stroke-linecap='round'/><path d='M4 3.5c4-1.6 8 1.6 14 0v9c-6 1.6-10-1.6-14 0z' fill='#23784a' stroke='#17313e' stroke-width='0.7'/></svg>Strong record</li><li><svg viewBox='0 0 20 24' width='28' height='32' aria-hidden='true' style='overflow:visible;flex-shrink:0'><path d='M3.2 2v20.5' stroke='#17313e' stroke-width='1.6' stroke-linecap='round'/><path d='M4 3.5c4-1.6 8 1.6 14 0v9c-6 1.6-10-1.6-14 0z' fill='#f6c400' stroke='#17313e' stroke-width='0.7'/></svg>Mixed record</li><li><svg viewBox='0 0 20 24' width='28' height='32' aria-hidden='true' style='overflow:visible;flex-shrink:0'><path d='M3.2 2v20.5' stroke='#17313e' stroke-width='1.6' stroke-linecap='round'/><path d='M4 3.5c4-1.6 8 1.6 14 0v9c-6 1.6-10-1.6-14 0z' fill='#d62b1f' stroke='#17313e' stroke-width='0.7'/></svg>Red flags</li><li><svg viewBox='0 0 20 24' width='28' height='32' aria-hidden='true' style='overflow:visible;flex-shrink:0'><path d='M3.2 2v20.5' stroke='#17313e' stroke-width='1.6' stroke-linecap='round'/><path d='M4 3.5c4-1.6 8 1.6 14 0v9c-6 1.6-10-1.6-14 0z' fill='none' stroke='#17313e' stroke-width='1.1' stroke-dasharray='2 1.6'/></svg>Not enough evidence</li></ul></aside></div>",
+      "css": ".ds-legend-board { background: var(--color-rescue, #d62b1f); padding: 24px; } .ds-legend { width: 288px; background: var(--color-board, #ffffff); color: var(--color-water, #17313e); padding: 20px 24px; font-family: var(--font-sans, 'Atkinson Hyperlegible Next', sans-serif); } .ds-legend h2 { margin: 0; font-family: var(--font-stencil, 'Big Shoulders Stencil', sans-serif); font-size: 1.25rem; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; } .ds-legend ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; } .ds-legend li { display: flex; align-items: center; gap: 12px; font-weight: 700; }"
+    },
+    {
+      "name": "Tide Staff Loader",
+      "kind": "custom",
+      "refersTo": "loader-row-wet",
+      "description": "A live check's loading state: each real step is a tide staff section; finished steps drain from deep water to haze.",
+      "html": "<div class='ds-tide'><div class='ds-tide-head'><p>Checking live</p><span>About 20 seconds.</span></div><ol><li class='dry'><span class='ds-staff red'><b>1</b></span><span class='ds-step'>Search the web for each check</span></li><li class='dry'><span class='ds-staff white'><b>2</b></span><span class='ds-step'>Download the pages</span></li><li class='wet'><span class='ds-staff'><b>3</b></span><span class='ds-step'><i class='ds-dot'></i>Check every quote word for word</span></li></ol></div>",
+      "css": ".ds-tide { border: 2px solid var(--color-water, #17313e); border-radius: 3px; overflow: hidden; color: var(--color-water, #17313e); font-family: var(--font-sans, 'Atkinson Hyperlegible Next', sans-serif); } .ds-tide-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; padding: 16px 20px; border-bottom: 2px solid var(--color-water, #17313e); } .ds-tide-head p { margin: 0; font-family: var(--font-stencil, 'Big Shoulders Stencil', sans-serif); font-size: 1.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.01em; } .ds-tide-head span { font-size: 0.875rem; opacity: 0.75; } .ds-tide ol { list-style: none; margin: 0; padding: 0; background: var(--color-haze, #eaeff0); } .ds-tide li { display: grid; grid-template-columns: 2.75rem 1fr; min-height: 4.5rem; transition: background-color 700ms, color 700ms; } .ds-tide li.wet { background: var(--color-water, #17313e); color: var(--color-board, #ffffff); } .ds-staff { position: relative; border-right: 2px solid var(--color-water, #17313e); background-image: repeating-linear-gradient(to bottom, currentColor 0 3px, transparent 3px 14px); background-size: 45% 100%; background-repeat: no-repeat; } .ds-staff.red { background-color: var(--color-rescue, #d62b1f); color: var(--color-board, #ffffff); } .ds-staff.white { background-color: var(--color-board, #ffffff); color: var(--color-water, #17313e); } li.wet .ds-staff { color: rgb(255 255 255 / 0.35); } .ds-staff b { position: absolute; right: 6px; top: 6px; font-family: var(--font-stencil, 'Big Shoulders Stencil', sans-serif); font-size: 1.125rem; font-weight: 900; line-height: 1; } .ds-step { display: flex; align-items: center; gap: 10px; padding: 12px 16px; font-weight: 700; } .ds-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--color-flag-yellow, #f6c400); animation: ds-pulse 1.4s ease-in-out infinite; } @keyframes ds-pulse { 50% { transform: scale(0.6); } } @media (prefers-reduced-motion: reduce) { .ds-dot { animation: none; } }"
+    },
+    {
+      "name": "Verdict Pole",
+      "kind": "custom",
+      "refersTo": "board-row",
+      "description": "Brand mode's answer: the big flag hoists up a tall ink pole beside the stencil question and the ink verdict label.",
+      "html": "<div class='ds-verdict'><svg viewBox='0 0 132 214' height='224' aria-hidden='true'><rect x='12' y='204' width='40' height='8' rx='1.5' fill='#17313e'/><path d='M31 16V205' stroke='#17313e' stroke-width='4' stroke-linecap='round'/><circle cx='31' cy='10' r='6.5' fill='#17313e'/><g class='ds-hoist'><path d='M33 20c26-9 48 9 94 0v58c-46 9-68-9-94 0z' fill='#f6c400' stroke='#17313e' stroke-width='1.5'/></g></svg><div><h2>Is this brand sustainable?</h2><p><span class='ds-vlabel'>Mixed record</span> 2 good signs, 1 red flag across 4 checks.</p><small>This describes the evidence Low Tide could verify, not a certification.</small></div></div>",
+      "css": ".ds-verdict { display: flex; align-items: flex-end; gap: 40px; color: var(--color-water, #17313e); font-family: var(--font-sans, 'Atkinson Hyperlegible Next', sans-serif); } .ds-verdict h2 { margin: 0; font-family: var(--font-stencil, 'Big Shoulders Stencil', sans-serif); font-size: 3.75rem; font-weight: 800; line-height: 0.92; letter-spacing: 0.01em; text-transform: uppercase; overflow-wrap: anywhere; } .ds-verdict p { margin: 20px 0 0; font-size: 1.125rem; } .ds-vlabel { margin-right: 20px; font-family: var(--font-stencil, 'Big Shoulders Stencil', sans-serif); font-size: 2.25rem; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; } .ds-verdict small { display: block; margin-top: 16px; font-size: 0.875rem; opacity: 0.75; } .ds-hoist { animation: ds-hoist 1100ms cubic-bezier(0.16, 1, 0.3, 1) both; } @keyframes ds-hoist { from { transform: translateY(118px); } to { transform: translateY(0); } } @media (prefers-reduced-motion: reduce) { .ds-hoist { animation: none; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Lifeguard's Conditions Board",
+    "overview": "Low Tide is the board a lifeguard posts at the foot of the stand: a rescue-red painted panel, white rows ruled in deep-water ink, stencil caps you can read from the sand, and a beach flag that tells you the conditions. A verdict is never a score. It is a flag run up a pole, in the three colors every beachgoer already knows, with the exact passage behind it written out underneath. The page is built for a judge watching a projector and a shopper holding a phone, so everything reads at arm's length and nothing hides behind a hover.\n\nThe layout is a grounded list. One column, one board row per finding or check, each opening with its flag and a stencil title and then the evidence. Low Tide's own sentences are plain and short; the words it quotes from a source slow down into a reading serif under a yellow highlighter, because the quote is the proof. Motion is spent on one authored moment: during a live check, deep water floods a tide staff and drains one mark per real step, then the flag hoists when the answer lands. A tampered quote is pulled in the same language: its flag comes down and the swapped word is struck through in red.\n\nThe world refuses the eco scorecard of rounded cards and rating badges, and a green flag never reads as a certification. Depth is paint, not simulated plywood.",
+    "keyCharacteristics": [
+      "One loud red board (header, footer, CHECK plaque) over a white ground with deep-water ink.",
+      "Verdict color lives only in flag cloth: yellow, green, red, or a dashed empty flag.",
+      "Three voices: stencil caps for the board, a plain hyperlegible sans for Low Tide, a reading serif for every quoted source.",
+      "Flat, nearly square, ruled in 2px ink.",
+      "One authored motion: the tide drains during a live check, the flag hoists on arrival, and a pulled finding lowers its flag."
+    ],
+    "rules": [
+      {
+        "name": "The Flag Carries the Color Rule",
+        "body": "A verdict's color appears only as flag cloth: on the verdict pole, on a row's flag, in the legend. The verdict label beside it is always ink stencil caps. No colored text labels, no rows tinted by verdict, no colored badges.",
+        "section": "colors"
+      },
+      {
+        "name": "The Red Ink Rule",
+        "body": "Rescue-red text means the check rejected something or could not run: \"Finding removed\", the swapped word in a tampered quote, a failed tamper test, an entry hint. It is never emphasis and never a heading.",
+        "section": "colors"
+      },
+      {
+        "name": "The Highlighter Is Verbatim Rule",
+        "body": "The highlighter goes only under words copied exactly from a source and checked word for word. The claim's matched phrases get a flag-yellow underline instead, and Low Tide's own sentences get neither.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Voices Rule",
+        "body": "Stencil caps speak for the board (names, headings, verdicts, plaque labels). Atkinson speaks for Low Tide. Source Serif speaks only for someone else's words: the Guides, a page about the brand, the shopper's own claim. Low Tide's sentences never go in serif, and source words never go in stencil or sans.",
+        "section": "typography"
+      },
+      {
+        "name": "The Caps Are Paint Rule",
+        "body": "Stencil is always uppercase and never sets running text or an explanation. A sentence that needs reading goes in Atkinson.",
+        "section": "typography"
+      },
+      {
+        "name": "The Grounded List Rule",
+        "body": "Results are one list of ruled rows read top to bottom. Never a grid of tiles, never cards side by side.",
+        "section": "layout"
+      },
+      {
+        "name": "The Painted, Not Built Rule",
+        "body": "The board is paint on a flat plane. No ledge borders, bevels, corner bolts, drop shadows, or layered panels pretending to be plywood.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do put every verdict on a flag: the cloth carries the color, the label stays ink stencil caps.",
+      "Do set every source quote in Source Serif 4 (1.1rem, 1.7) under the highlighter, captioned with its source link and \"Quote checked word for word\".",
+      "Do reserve the haze plate for the claim-mode Green Guides passage; brand evidence sits flush on the white row, split by 25% ink hairlines.",
+      "Do rule every board row with a 2px deep-water line and keep results in one list.",
+      "Do show honest empty answers (Not covered, Not found, Not enough evidence) as a dashed empty flag with one plain sentence.",
+      "Do keep a pulled finding in its row: flag lowered, the swapped word struck through in red, \"Finding removed\" in place of any verdict label.",
+      "Do keep the footer text exactly: \"Low Tide reads your claim against the FTC Green Guides (16 CFR Part 260). It is not legal advice. Every quote is checked word for word against the Guides before it is shown.\" Brand mode adds one sentence: \"In brand mode, every quote is checked word for word against the page it came from.\"",
+      "Do stop every animation under prefers-reduced-motion."
+    ],
+    "donts": [
+      "Don't fly a colored flag or show a verdict label that no verified quote backs. Answers without a quote (Not covered, Not found, Not enough evidence) fly the dashed empty flag.",
+      "Don't build the eco scorecard: no rounded cards, no rating badges, no container rounder than 4px.",
+      "Don't let a green flag read as a certification: no seal, ribbon, or badge framing around a flag.",
+      "Don't color a verdict label, tint a row by verdict, or set flag green as text.",
+      "Don't fake the board's hardware: no ledge borders, bevels, corner bolts, or drop shadows.",
+      "Don't use rescue-red text for emphasis or headings; red ink means something was rejected.",
+      "Don't put the highlighter on Low Tide's own words or on the claim; the claim's phrases take the flag-yellow underline.",
+      "Don't use the words \"illegal\", \"violation\", or \"lawsuit\" anywhere in the UI. Low Tide is a reading of guidance, not legal advice.",
+      "Don't use em dashes in UI copy."
+    ]
+  }
+}
