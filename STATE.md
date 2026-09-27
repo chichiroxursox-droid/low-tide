@@ -158,3 +158,15 @@ Ethan reframed brand mode at 3:20pm: a verdict about the brand, not its claims a
 - Notes: README brand section rewritten for the verdict with new limitations. DEVPOST.md 699 words, names Sustainability and Best Use of Gemini. CLAUDE.md brand contract, footer sentence, scope cuts and demo path updated. New video ~/Desktop/low-tide-demo.mp4, H.264, 1280x800, 76.4s, from prod: Biodegradable chip, ocean plastic chip, H&M verdict (Red flags) with the Norwegian Consumer Authority quote, live claim, tamper test. Earlier videos kept as low-tide-demo-v1.mp4 and low-tide-demo-v2.mp4
 - Next step: Ethan submits on Devpost (tasks/todo.md). Code freeze Sun 8:00am
 - Scope cuts so far: none
+
+## Lifeguard board redesign (v4)
+Ethan asked how to improve Low Tide, for a redesign with a design skill other than the generic one, and for its own loading screen. Used Impeccable: PRODUCT.md written from confirmed answers (judges first, loading screen during live checks with real streamed progress, avoid an AI-dashboard look). Its concept roll assigned candidate 3 of 7 from the grounded list (seed dd8c1e80), and Ethan picked it on the decision page: Low Tide as a lifeguard's conditions board.
+
+### Sat 9:31pm, D1
+- Milestone: redesign shipped to prod and tagged `v4`. Rollback points: `v3` (brand verdict, old look), `v2`, `v1`
+- Prod URL works: yes. Playwright on prod at 390 and 1280: tamper test pulls the row (flag lowered, "Finding removed", swapped word struck through), both brand samples, no horizontal scroll, no console errors. Live Allbirds check streamed its stages to the tide loader (pages read at 12.9s, answer at 16.7s, Mixed record)
+- Tests pass: yes, 27/27; tsc, lint, build clean; Impeccable detector 0 findings
+- What broke: an old local server kept serving a rebuilt .next and broke hydration (killed it); 37 " 2" duplicate files in the .next cache again broke tsc (deleted, cache only). A fresh finish reviewer returned 8 material fixes (tamper beat, claim loader honesty, a real tide staff, one-line lead, highlight gap moving punctuation, fake-depth ledges and bolts, claim flags hoisting, brand evidence drifting toward rating-badge cards), all resolved, plus one regression it caught (a pulled row still showed a verdict label, now "Finding removed"). Final disposition: ship
+- Notes: live brand checks now stream NDJSON (one stage line per real step, then the result); samples and errors stay JSON; the claim route is unchanged. The live claim loader is one honest row, since the guard runs instantly after the single Gemini call. DESIGN.md and .impeccable/design.json record the system. New video ~/Desktop/low-tide-demo.mp4, H.264, 1280x800, 79.1s, frames checked (tamper beat shows the pulled row); the previous one is ~/Desktop/low-tide-demo-v3.mp4
+- Next step: Ethan submits on Devpost. Code freeze Sun 8:00am
+- Scope cuts so far: none. Not built (reviewer's optional ceiling ideas): flag ripple at the top of the hoist, water draining off the results, a painted pinstripe on the board
