@@ -212,9 +212,11 @@ export function guardChecks(picked: Picked, pages: SourcePage[], brand: string):
       const known = sourceTier(page.host) === "known";
       signals.push({ sign: f.sign, quote: f.quote, note: soften(f.note), url: page.url, host: page.host, own: mine, known });
     }
-    // Known sources first: a lesser-known site speaks for a check only when no known source does. The brand's own
-    // site stays either way, under its own rules above.
-    const kept = (signals.some((s) => s.known) ? signals.filter((s) => s.known || s.own) : signals).slice(0, 2);
+    // Known sources first: a lesser-known site speaks for a check only when no known source does, and a known source
+    // is never cut for the brand's own site, which otherwise stays under its own rules above. (sort is stable)
+    const kept = (signals.some((s) => s.known) ? signals.filter((s) => s.known || s.own) : signals)
+      .sort((a, b) => Number(b.known) - Number(a.known))
+      .slice(0, 2);
     const good = kept.some((s) => s.sign === "good");
     const red = kept.some((s) => s.sign === "red");
     return { check, mark: good && red ? "both" : good ? "good" : red ? "red" : "not_found", signals: kept };
@@ -405,7 +407,7 @@ export async function checkBrand(input: BrandInput, onStage: (s: Stage) => void 
   // pages about other companies), and a junk site is never read. The link the shopper pasted is exempt.
   // Known sources and the brand's own site go first, so the page cap never drops them for a lesser-known site.
   const name = ruleName(input);
-  const lesser = (p: Page) => Number(kindOf(p.host, name) === "other");
+  const lesser = (p: Page) => (p === first ? -1 : Number(kindOf(p.host, name) === "other"));
   const pages: SourcePage[] = [first, ...read.filter((p) => p && namesBrand(p.text, name) && kindOf(p.host, name) !== "junk")]
     .filter((p): p is Page => p !== null)
     .filter((p, i, all) => all.findIndex((q) => q.url === p.url) === i)

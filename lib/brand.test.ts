@@ -194,13 +194,17 @@ test("known sources come first: a lesser-known site only speaks for a check noth
     watchdogs: [f("red", "S4", WATCH), f("red", "S7", WATCH)],
   });
   const hosts = (i: number) => r.checks[i].signals.map((s) => s.host);
-  assert.deepEqual(hosts(1), ["brand.example", "reuters.com"]); // the brand's own site stays next to a known source
+  assert.deepEqual(hosts(1), ["reuters.com", "brand.example"]); // the brand's own site stays next to a known source
   assert.equal(marks(r).climate, "both");
   assert.deepEqual(hosts(3), ["blog.example"]); // nothing better covers ratings
   assert.equal(r.checks[3].signals[0].known, false);
   assert.deepEqual(hosts(4), ["reuters.com"]);
   assert.equal(r.checks[4].signals[0].known, true);
   assert.deepEqual(r.removed, { mismatch: 0, offCheck: 0, wrongSite: 0, banned: 0 });
+  // The brand's own findings listed first can't push a known source's red flag out of the two kept.
+  const own = guard({ climate: [f("good", "S1", CLIMATE), f("good", "S1", CLIMATE), f("red", "S7", LABOR)] });
+  assert.equal(marks(own).climate, "both");
+  assert.equal(own.checks[1].signals[0].host, "reuters.com");
 });
 
 test("sourceTier knows established publishers and official sites, and never reads junk", () => {

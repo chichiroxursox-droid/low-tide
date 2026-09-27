@@ -19,7 +19,7 @@ Brand mode searches with `google.tools.googleSearch`, which ships in `@ai-sdk/go
 - `lib/guard.test.ts`: `node --test` cases: real quote passes, one changed word fails, quote from the wrong section fails
 - `fixtures/`: saved Gemini output for the sample claims. Samples are served from here, so the app works with no API key
 - `lib/brand.ts`: brand pipeline: input parsing, `isSafeUrl`, `readPage`, `namesBrand`, `hostNamesBrand`, `ruleName`, `sourceTier` (the known and junk source lists), the five searches (`findSources`), the pick call (`pickQuotes`), `guardChecks`, `verdictFor`, `checkBrand`
-- `lib/brand.test.ts`: `node --test` cases for `htmlToText`, `isSafeUrl`, `parseBrandInput`, `readPage`, `namesBrand`, `hostNamesBrand`, `ruleName`, every `guardChecks` source rule and mark, and every `verdictFor` branch
+- `lib/brand.test.ts`: `node --test` cases for `htmlToText`, `isSafeUrl`, `parseBrandInput`, `readPage`, `namesBrand`, `hostNamesBrand`, `ruleName`, `sourceTier`, every `guardChecks` source rule and mark, the known-first rule, and every `verdictFor` branch
 - `app/api/brand/route.ts`: brand samples, live brand check, offline line, "Couldn't find enough" line, verdict from `verdictFor` at serve time. Samples and errors return JSON; a live brand check streams NDJSON (one `stage` line per real step from `checkBrand`, then one `result` line) so the tide loader shows real progress. Never a 500
 - `fixtures/brands.json`: saved brand checks for Patagonia (Mixed record) and H&M (Red flags), guarded at seed time and unedited, so brand samples work with no API key. No verdict is saved; the route computes it
 - `scripts/seed-brands.ts`: runs the live brand pipeline and writes `fixtures/brands.json`
@@ -44,7 +44,7 @@ Guard (`guardChecks`, pure):
 - A page is the brand's own when a label of its host starts with the brand's name, "the" or "about" allowed in front (`hostNamesBrand`). A name under 4 characters must be the whole label, a company word like "group" aside, so `hmrc.gov.uk` isn't H&M's. For a link, the name is the label its site is registered under (`ruleName`: `www2.hm.com` is "hm"). A parent company's site is not recognized
 - Certifications, labor and ratings: a `good` finding from a brand-owned page is `wrongSite`, because the brand can't vouch for itself. Climate may come from the brand's own site. `red` findings may come from any source
 - A quote or source host containing a banned word is `banned`
-- Known sources first: when a check keeps a finding from a known source, its findings from other (lesser-known) sites are dropped, and its own-site findings stay. These surplus findings are not counted as removed. Each signal carries `own` and `known`
+- Known sources first: when a check keeps a finding from a known source, its findings from other (lesser-known) sites are dropped, its own-site findings stay, and known findings sort ahead of own-site ones before the cut to 2. These surplus findings are not counted as removed. Each signal carries `own` and `known`
 - Notes go through `soften`. Each check's mark comes from what survives: `good`, `red`, `both`, or `not_found`
 - Removed findings are counted as `mismatch`, `offCheck`, `wrongSite`, `banned`, and the UI says how many were removed and why
 
