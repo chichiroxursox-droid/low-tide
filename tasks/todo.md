@@ -3,7 +3,7 @@
 **About:** OwlHacks 2026 (Sustainability, Best Use of Gemini). Checks green product claims against the FTC Green Guides with verified quotes. Prod: https://low-tide-nine.vercel.app. Build log lives in STATE.md.
 
 ## Active
-- **Submit on Devpost** | Priority: high | Status: ready | Paste DEVPOST.md (brand first, five checks, known sources), attach the new ~/Desktop/low-tide-demo.mp4 (or upload it unlisted), pick Sustainability + Best Use of Gemini, submit before Sun 9:15am
+- **Submit on Devpost** | Priority: high | Status: ready | Paste DEVPOST.md (brand first, five checks, known sources), upload ~/Desktop/low-tide-demo-narrated.mp4 (your narrated recording, trimmed) to YouTube as Unlisted and paste the link, add the 4 images from ~/Desktop/low-tide-media/ (1 is the thumbnail), pick Sustainability + Best Use of Gemini, submit before Sun 9:15am
 - **Demo run on phone** | Priority: medium | Status: todo | Run the demo path once on prod from a phone before judging, brand mode included: it opens on brand mode: the H&M sample verdict (Red flags) and one live brand (about 30 seconds)
 
 ## Resolved
