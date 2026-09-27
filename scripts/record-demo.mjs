@@ -46,12 +46,14 @@ const top = async () => {
 
 await page.goto(url);
 await page.getByRole("heading", { name: "Low Tide" }).waitFor();
+// The flag legend repeats verdict labels, so result text is looked up inside the results region only.
+const results = page.locator("section[aria-live]");
 await caption("Low Tide checks green marketing claims against the FTC Green Guides.");
 await wait(4000);
 
 await caption("Sample: “Biodegradable plastic bag”");
 await page.getByRole("button", { name: "Biodegradable plastic bag" }).click();
-await page.getByText("Needs qualification").first().waitFor();
+await results.getByText("Needs qualification").first().waitFor();
 await wait(1200);
 await scrollTo(page.locator("mark").first());
 await caption("Needs qualification. The exact 260.8 passage is highlighted, checked word for word.");
@@ -60,9 +62,9 @@ await wait(6000);
 await top();
 await caption("Sample: “Made with ocean plastic”");
 await page.getByRole("button", { name: "Made with ocean plastic" }).click();
-await page.getByText("Not covered by the Guides").waitFor();
+await results.getByText("Not covered by the Guides").waitFor();
 await wait(1200);
-await scrollTo(page.getByText("Not covered by the Guides"));
+await scrollTo(results.getByText("Not covered by the Guides"));
 await caption("The Guides never mention ocean plastic, so Low Tide says so instead of forcing a rule to fit.");
 await wait(6500);
 
@@ -73,7 +75,7 @@ await wait(2000);
 await page.getByRole("button", { name: "H&M", exact: true }).click();
 const brandHeading = page.getByRole("heading", { name: "Is H&M sustainable?" });
 await brandHeading.waitFor();
-await page.getByText("Red flags", { exact: true }).waitFor();
+await results.getByText("Red flags", { exact: true }).waitFor();
 await scrollTo(brandHeading);
 await caption("H&M is a saved answer. Every quote was checked word for word against its page on Sep 26, 2026.");
 await wait(4500);

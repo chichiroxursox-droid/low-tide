@@ -1,13 +1,19 @@
 @import "tailwindcss";
 
+/* The lifeguard stand: a rescue-red painted board, white board rows ruled in deep-water ink, beach flag cloth. */
 @theme inline {
-  --color-flat: #e7ece8;
-  --color-deep: #12343b;
-  --color-buoy: #e8b04b;
-  --color-glass: #9ccbb8;
-  --color-sun: #f7e49a;
-  --font-sans: var(--font-schibsted);
-  --font-serif: var(--font-newsreader);
+  --color-rescue: #d62b1f;
+  --color-rescue-edge: #a51e15;
+  --color-flag-yellow: #f6c400;
+  --color-flag-green: #23784a;
+  --color-water: #17313e;
+  --color-water-2: #245266;
+  --color-board: #ffffff;
+  --color-haze: #eaeff0;
+  --color-mark: #fbe27a;
+  --font-stencil: var(--font-big-shoulders);
+  --font-sans: var(--font-atkinson);
+  --font-serif: var(--font-source-serif);
 }
 
 html {
@@ -15,16 +21,42 @@ html {
 }
 
 body {
-  background: var(--color-flat);
-  color: var(--color-deep);
+  background: var(--color-board);
+  color: var(--color-water);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-deep);
+  outline: 3px solid var(--color-water);
   outline-offset: 3px;
 }
 
-/* The one motion moment: the waterline draws itself when an answer lands. */
+/* The one authored moment: a live check is deep water that drains a mark at a time, then the flag goes up. */
+.tide-edge {
+  animation: tide-drift 7s linear infinite;
+}
+@keyframes tide-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.tide-active {
+  animation: tide-pulse 1.4s ease-in-out infinite;
+}
+@keyframes tide-pulse {
+  50% { transform: scale(0.6); }
+}
+.flag-hoist {
+  animation: hoist 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes hoist {
+  from { transform: translateY(var(--hoist-from, 120px)); }
+  to { transform: translateY(0); }
+}
+.flag-lower {
+  animation: lower 800ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes lower {
+  to { transform: translateY(14px); opacity: 0; }
+}
 .waterline path {
   stroke-dasharray: 1;
   animation: tideline 900ms ease-out both;
@@ -33,6 +65,8 @@ body {
   from { stroke-dashoffset: 1; }
   to { stroke-dashoffset: 0; }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .waterline path { animation: none; }
+  .tide-edge, .tide-active, .flag-hoist, .waterline path { animation: none; }
+  .flag-lower { animation: none; opacity: 0; }
 }

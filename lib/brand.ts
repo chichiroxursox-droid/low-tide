@@ -185,7 +185,7 @@ const SEARCHES: Record<CheckKey, (brand: string) => string> = {
 
 // Call 1, once per check in parallel. Search only finds links: Gemini's text is thrown away, and the links come
 // from the SDK's sources, never from text the model wrote (it garbles Google's long redirect links).
-export async function findSources(brand: string): Promise<string[]> {
+export async function findSources(brand: string, onSearch?: (check: CheckKey, links: number) => void): Promise<string[]> {
   const lists = await Promise.all(
     CHECKS.map(async (check) => {
       const r = await generateText({
@@ -201,7 +201,9 @@ export async function findSources(brand: string): Promise<string[]> {
         ...(meta?.groundingMetadata?.groundingChunks ?? []).flatMap((c) => (c.web?.uri ? [c.web.uri] : [])),
       ];
       return [...new Set(urls)].slice(0, 4);
-    }).map((p) => p.catch((): string[] => [])), // ponytail: a failed search just brings no links for that check
+    })
+      .map((p) => p.catch((): string[] => [])) // ponytail: a failed search just brings no links for that check
+      .map((p, i) => p.then((links) => (onSearch?.(CHECKS[i], links.length), links))),
   );
   // Interleave so every check gets a share of the 12 pages.
   const urls: string[] = [];
@@ -313,10 +315,23 @@ export function ruleName(input: BrandInput): string {
   return labels.at(-1)!;
 }
 
+// What the loading screen shows, sent as each real step of a live check finishes.
+export type Stage =
+  | { stage: "search"; check: CheckKey; links: number }
+  | { stage: "read"; found: number; read: number }
+  | { stage: "named"; pages: number }
+  | { stage: "picked"; findings: number }
+  | { stage: "checked"; kept: number; removed: number };
+
 // The whole brand check. The verdict is left to verdictFor, which the route runs at serve time.
-export async function checkBrand(input: BrandInput): Promise<BrandCheck> {
-  const [first, found] = await Promise.all([input.url ? readPage(input.url.href) : null, findSources(input.name)]);
+export async function checkBrand(input: BrandInput, onStage: (s: Stage) => void = () => {}): Promise<BrandCheck> {
+  const [first, found] = await Promise.all([
+    input.url ? readPage(input.url.href) : null,
+    findSources(input.name, (check, links) => onStage({ stage: "search", check, links })),
+  ]);
   const read = await Promise.all(found.map(readPage));
+  const pagesFound = found.length + (input.url ? 1 : 0);
+  onStage({ stage: "read", found: pagesFound, read: read.filter(Boolean).length + (first ? 1 : 0) });
   // A page that never names the brand can't be evidence about it (a made-up brand otherwise collects generic
   // pages about other companies). The link the shopper pasted is exempt.
   const name = ruleName(input);
@@ -324,7 +339,17 @@ export async function checkBrand(input: BrandInput): Promise<BrandCheck> {
     .filter((p): p is Page => p !== null)
     .filter((p, i, all) => all.findIndex((q) => q.url === p.url) === i)
     .map((p, i) => ({ ...p, id: `S${i + 1}` }));
-  const base = { brand: input.name, pagesFound: found.length + (input.url ? 1 : 0), pagesRead: pages.length };
+  onStage({ stage: "named", pages: pages.length });
+  const base = { brand: input.name, pagesFound, pagesRead: pages.length };
   if (!pages.length) return { ...base, ...guardChecks({ checks: [] }, [], name) };
-  return { ...base, ...guardChecks(await pickQuotes(input.name, pages), pages, name) };
+  const picked = await pickQuotes(input.name, pages);
+  onStage({ stage: "picked", findings: picked.checks.reduce((n, c) => n + c.findings.length, 0) });
+  const guarded = guardChecks(picked, pages, name);
+  const { mismatch, offCheck, wrongSite, banned } = guarded.removed;
+  onStage({
+    stage: "checked",
+    kept: guarded.checks.reduce((n, c) => n + c.signals.length, 0),
+    removed: mismatch + offCheck + wrongSite + banned,
+  });
+  return { ...base, ...guarded };
 }

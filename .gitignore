@@ -43,3 +43,5 @@ next-env.d.ts
 # local hook state
 .planning/
 .tmp/
+.impeccable/decisions/
+.impeccable/questions/
