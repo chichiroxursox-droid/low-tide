@@ -8,7 +8,7 @@ const sourceSerif = Source_Serif_4({ variable: "--font-source-serif", subsets: [
 
 export const metadata: Metadata = {
   title: "Low Tide",
-  description: "Check a green product claim against the FTC Green Guides, or check whether a brand is sustainable, with every quote verified.",
+  description: "Check whether a brand is sustainable, for the planet and the people who make its products, or check a green product claim against the FTC Green Guides, with every quote verified.",
 };
 
 // The design contract for this surface. It rides in the built HTML so the finish review can audit the render against it.

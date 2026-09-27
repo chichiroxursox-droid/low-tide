@@ -6,7 +6,7 @@ import { BANNED, soften, verifyQuote } from "./guard.ts";
 
 export type Page = { url: string; host: string; text: string };
 export type SourcePage = Page & { id: string };
-export const CHECKS = ["certifications", "climate", "ratings", "watchdogs"] as const;
+export const CHECKS = ["certifications", "climate", "labor", "ratings", "watchdogs"] as const;
 export type CheckKey = (typeof CHECKS)[number];
 export type Sign = "good" | "red";
 export type Mark = "good" | "red" | "both" | "not_found";
@@ -14,7 +14,7 @@ export type Verdict = "strong" | "mixed" | "red_flags" | "not_enough";
 export type Picked = {
   checks: { check: CheckKey; findings: { sign: Sign; sourceId: string; quote: string; note: string }[] }[];
 };
-export type Signal = { sign: Sign; quote: string; note: string; url: string; host: string; own: boolean };
+export type Signal = { sign: Sign; quote: string; note: string; url: string; host: string; own: boolean; known: boolean };
 export type CheckResult = { check: CheckKey; mark: Mark; signals: Signal[] };
 export type Removed = { mismatch: number; offCheck: number; wrongSite: number; banned: number };
 export type BrandCheck = { brand: string; pagesFound: number; pagesRead: number; checks: CheckResult[]; removed: Removed };
@@ -121,21 +121,75 @@ export async function readPage(url: string): Promise<Page | null> {
   }
 }
 
+// Publishers Low Tide quotes first. A site matches its own address or any address under it.
+// ponytail: a hand-kept list. A reputable publisher missing from it is still read, as a lesser-known site.
+const KNOWN = `
+  reuters.com apnews.com bbc.com bbc.co.uk theguardian.com nytimes.com washingtonpost.com wsj.com ft.com bloomberg.com
+  economist.com npr.org pbs.org cnbc.com cnn.com nbcnews.com cbsnews.com abcnews.go.com time.com fortune.com axios.com
+  politico.com politico.eu theatlantic.com newyorker.com vox.com theverge.com wired.com businessinsider.com
+  fastcompany.com latimes.com usatoday.com aljazeera.com dw.com france24.com euronews.com lemonde.fr spiegel.de nrk.no
+  abc.net.au cbc.ca independent.co.uk telegraph.co.uk thetimes.co.uk scmp.com japantimes.co.jp straitstimes.com
+  voguebusiness.com businessoffashion.com wwd.com just-style.com edie.net trellis.net greenbiz.com esgtoday.com esgdive.com grist.org
+  insideclimatenews.org carbonbrief.org theconversation.com
+  bcorporation.net fairtrade.net fairtradeamerica.org fairtradecertified.org fairtrade.org.uk bluesign.com fsc.org
+  c2ccertified.org global-standard.org oeko-tex.com textileexchange.org fairwear.org fairlabor.org rainforest-alliance.org
+  sa-intl.org wrapcompliance.org onepercentfortheplanet.org leatherworkinggroup.com regenorganic.org greenseal.org
+  goodonyou.eco fashionrevolution.org cdp.net sciencebasedtargets.org knowthechain.org remakeworld.org ethicalconsumer.org
+  worldbenchmarkingalliance.org influencemap.org newclimate.org carbonmarketwatch.org stand.earth changingmarkets.org
+  sustainalytics.com msci.com ecovadis.com ceres.org asyousow.org planet-tracker.org climateaction100.org
+  transitionpathwayinitiative.org fashionchecker.org baptistworldaid.org.au
+  hrw.org amnesty.org business-humanrights.org cleanclothes.org workersrights.org laborrights.org antislavery.org
+  walkfree.org ethicaltrade.org labourbehindthelabel.org somo.nl globalwitness.org earthsight.org.uk greenpeace.org
+  wwf.org worldwildlife.org panda.org foe.org foe.co.uk sierraclub.org nrdc.org edf.org wri.org wrap.org.uk
+  ellenmacarthurfoundation.org ucsusa.org canopyplanet.org mightyearth.org
+  ilo.org un.org ohchr.org oecd.org unep.org unicef.org
+  canada.ca forbrukertilsynet.no acm.nl agcm.it asa.org.uk konsumentverket.se kkv.fi forbrugerombudsmanden.dk
+`.trim().split(/\s+/);
+// Governments, regulators and universities, by the address they're registered under: ftc.gov, gov.uk, gouv.fr,
+// europa.eu, harvard.edu, ox.ac.uk.
+const OFFICIAL = /(^|\.)(gov|mil|edu|europa\.eu|gc\.ca|admin\.ch)$|(^|\.)(gov|gouv|gob|govt|mil|edu|ac)\.[a-z]{2}$/;
+// Sites anyone can post to, shops, and essay mills. Never read.
+const JUNK = `
+  reddit.com quora.com medium.com substack.com pinterest.com facebook.com instagram.com tiktok.com x.com twitter.com
+  threads.net youtube.com linkedin.com tumblr.com blogspot.com wordpress.com wixsite.com weebly.com sites.google.com
+  fandom.com answers.com amazon.com amazon.co.uk ebay.com etsy.com aliexpress.com alibaba.com temu.com trustpilot.com
+  glassdoor.com indeed.com yelp.com sitejabber.com studocu.com coursehero.com bartleby.com ipl.org gradesfixer.com
+  ukessays.com studymoose.com edubirdie.com papersowl.com ivypanda.com scribd.com slideshare.net brainly.com chegg.com
+  123helpme.com quizlet.com
+`.trim().split(/\s+/);
+
+export type Tier = "known" | "other" | "junk";
+// Where a page comes from: a known publisher, junk, or any other site.
+export function sourceTier(host: string): Tier {
+  const h = host.toLowerCase().replace(/\.+$/, "");
+  const under = (site: string) => h === site || h.endsWith(`.${site}`);
+  if (JUNK.some(under)) return "junk";
+  return OFFICIAL.test(h) || KNOWN.some(under) ? "known" : "other";
+}
+// The brand's own site first, since shops and social sites can be a brand's own (Amazon, Temu).
+const kindOf = (host: string, brand: string) => (hostNamesBrand(host, brand) ? "own" : sourceTier(host));
+
 const sid = (s: string) => s.match(/S\d+/i)?.[0].toUpperCase() ?? "";
 
 // Certifications only ever count for a brand (holding none is not a finding), watchdog findings only against it.
-const SIGNS: Record<CheckKey, Sign[]> = { certifications: ["good"], climate: ["good", "red"], ratings: ["good", "red"], watchdogs: ["red"] };
+const SIGNS: Record<CheckKey, Sign[]> = {
+  certifications: ["good"],
+  climate: ["good", "red"],
+  labor: ["good", "red"],
+  ratings: ["good", "red"],
+  watchdogs: ["red"],
+};
 // A brand can't vouch for itself on these: a good sign has to come from a site it doesn't own.
-const INDEPENDENT_GOOD: CheckKey[] = ["certifications", "ratings"];
+const INDEPENDENT_GOOD: CheckKey[] = ["certifications", "labor", "ratings"];
 
-// Keeps only findings whose quote is really on the page they cite, then marks each of the four checks.
+// Keeps only findings whose quote is really on the page they cite, then marks each of the five checks.
 export function guardChecks(picked: Picked, pages: SourcePage[], brand: string): { checks: CheckResult[]; removed: Removed } {
   const byId = new Map(pages.map((p) => [p.id, p]));
   const removed: Removed = { mismatch: 0, offCheck: 0, wrongSite: 0, banned: 0 };
 
   const checks = CHECKS.map((check): CheckResult => {
     const signals: Signal[] = [];
-    for (const f of picked.checks.find((c) => c.check === check)?.findings.slice(0, 2) ?? []) {
+    for (const f of picked.checks.find((c) => c.check === check)?.findings.slice(0, 3) ?? []) {
       const page = byId.get(sid(f.sourceId));
       if (!page || !verifyQuote(f.quote, page.text)) {
         removed.mismatch++;
@@ -155,11 +209,15 @@ export function guardChecks(picked: Picked, pages: SourcePage[], brand: string):
         removed.banned++;
         continue;
       }
-      signals.push({ sign: f.sign, quote: f.quote, note: soften(f.note), url: page.url, host: page.host, own: mine });
+      const known = sourceTier(page.host) === "known";
+      signals.push({ sign: f.sign, quote: f.quote, note: soften(f.note), url: page.url, host: page.host, own: mine, known });
     }
-    const good = signals.some((s) => s.sign === "good");
-    const red = signals.some((s) => s.sign === "red");
-    return { check, mark: good && red ? "both" : good ? "good" : red ? "red" : "not_found", signals };
+    // Known sources first: a lesser-known site speaks for a check only when no known source does. The brand's own
+    // site stays either way, under its own rules above.
+    const kept = (signals.some((s) => s.known) ? signals.filter((s) => s.known || s.own) : signals).slice(0, 2);
+    const good = kept.some((s) => s.sign === "good");
+    const red = kept.some((s) => s.sign === "red");
+    return { check, mark: good && red ? "both" : good ? "good" : red ? "red" : "not_found", signals: kept };
   });
   return { checks, removed };
 }
@@ -177,11 +235,16 @@ export function verdictFor(checks: CheckResult[]): { verdict: Verdict; good: num
 }
 
 const SEARCHES: Record<CheckKey, (brand: string) => string> = {
-  certifications: (b) => `Which third-party sustainability certifications does the brand "${b}" hold (B Corp, Fair Trade, bluesign, FSC, Cradle to Cradle, GOTS)? Prefer the certifier's own pages and news coverage.`,
+  certifications: (b) => `Which third-party sustainability certifications does the brand "${b}" hold (B Corp, bluesign, FSC, Cradle to Cradle, GOTS, OEKO-TEX)? Prefer the certifier's own pages and news coverage.`,
   climate: (b) => `Does the brand "${b}" have a climate target validated by the Science Based Targets initiative, and does it publish its greenhouse gas emissions? Include any reports of targets missed or dropped.`,
+  labor: (b) => `Have news outlets, audits, or labor rights groups reported child labor, forced labor, unpaid wages, or unsafe factories in the supply chain of the brand "${b}"? How do labor rankings such as KnowTheChain, and accreditations such as Fair Trade, Fair Wear, or the Fair Labor Association, rate how it treats the workers who make its products?`,
   ratings: (b) => `How do independent sustainability ratings score the brand "${b}" (Good On You, CDP, Fashion Transparency Index, or similar)?`,
   watchdogs: (b) => `Has any regulator, consumer authority, or watchdog group acted on or investigated the environmental claims of the brand "${b}"?`,
 };
+const PREFER = "Prefer regulators, established news outlets, and recognized certifiers, raters, and rights groups. Skip blogs, forums, social media, and shops.";
+
+const LINKS = 4;
+const MAX_PAGES = 15;
 
 // Call 1, once per check in parallel. Search only finds links: Gemini's text is thrown away, and the links come
 // from the SDK's sources, never from text the model wrote (it garbles Google's long redirect links).
@@ -191,7 +254,7 @@ export async function findSources(brand: string, onSearch?: (check: CheckKey, li
       const r = await generateText({
         model: google(MODEL),
         tools: { google_search: google.tools.googleSearch({}) },
-        prompt: `Search the web. ${SEARCHES[check](brand)} Briefly describe what each source says.`,
+        prompt: `Search the web. ${SEARCHES[check](brand)} ${PREFER} Briefly describe what each source says.`,
         temperature: 0,
         maxRetries: 1,
       });
@@ -200,15 +263,15 @@ export async function findSources(brand: string, onSearch?: (check: CheckKey, li
         ...r.sources.flatMap((s) => (s.sourceType === "url" ? [s.url] : [])),
         ...(meta?.groundingMetadata?.groundingChunks ?? []).flatMap((c) => (c.web?.uri ? [c.web.uri] : [])),
       ];
-      return [...new Set(urls)].slice(0, 4);
+      return [...new Set(urls)].slice(0, LINKS);
     })
       .map((p) => p.catch((): string[] => [])) // ponytail: a failed search just brings no links for that check
       .map((p, i) => p.then((links) => (onSearch?.(CHECKS[i], links.length), links))),
   );
-  // Interleave so every check gets a share of the 12 pages.
+  // Interleave so every check gets a share of the pages.
   const urls: string[] = [];
-  for (let i = 0; i < 4; i++) for (const list of lists) if (list[i]) urls.push(list[i]);
-  return [...new Set(urls)].slice(0, 12);
+  for (let i = 0; i < LINKS; i++) for (const list of lists) if (list[i]) urls.push(list[i]);
+  return [...new Set(urls)];
 }
 
 const quoteField = z.string().describe("One continuous passage of 10 to 40 words, copied character for character from that source");
@@ -230,20 +293,26 @@ const pickSchema = z.object({
 
 const PICK_SYSTEM = `You check whether a brand's sustainability holds up, for a shopper deciding whether to buy from it. You get numbered source pages (S1, S2, ...). Use only what these pages say. Every finding must be about the brand named in the prompt: a passage about another company, or about the topic in general, is not a finding.
 
-checks: one entry for each check below that at least one source speaks to, with up to 2 findings each.
-- certifications: third-party sustainability certifications the brand holds (B Corp, Fair Trade, bluesign, FSC, Cradle to Cradle, GOTS). Only good findings: a source confirming a current certification. Not holding a certification is not a finding.
+Each source is marked as a known source (a regulator, government, university, established news outlet, or recognized certifier, rater, or rights group), the brand's own site, or an other site. For each check, quote known sources first. Quote an other site only for a check that no known source speaks to.
+
+checks: one entry for each check below that at least one source speaks to, with up to 3 findings each, best first.
+- certifications: third-party sustainability certifications the brand holds (B Corp, bluesign, FSC, Cradle to Cradle, GOTS, OEKO-TEX). Only good findings: a source confirming a current certification. Not holding a certification is not a finding.
 - climate: good if a source shows a climate target validated by the Science Based Targets initiative, or published greenhouse gas emissions; red if a source reports targets missed or dropped, or emissions rising.
+- labor: how the people who make the brand's products are treated. red if a source reports child labor, forced labor, unpaid or withheld wages, unsafe factories, or workers punished for organizing in the brand's supply chain; good if a source shows Fair Trade certified production, Fair Wear or Fair Labor Association accreditation, or a high labor ranking such as KnowTheChain.
 - ratings: independent sustainability ratings (Good On You, CDP, Fashion Transparency Index, or similar). good for a high rating, red for a low one. Quote the passage that states the rating.
 - watchdogs: red if a regulator, consumer authority, or watchdog group acted on or criticized the brand's environmental claims. Only red findings.
-Each finding: its sign, the id of the source, a quote, and a note. The quote is one continuous passage of 10 to 40 words copied character for character from that source: no ellipses, no paraphrase, no stitching sentences together. The note is one plain sentence a shopper can follow.
-Only include a finding when the quoted passage itself shows it. The absence of news is not a finding. Never use the words illegal, violation, or lawsuit.`;
+Each finding: its sign, the id of the source, a quote, and a note. The quote is one continuous passage of 10 to 40 words copied character for character from that source: no ellipses, no paraphrase, no stitching sentences together. The note is one plain sentence a shopper can follow. It says only what the quote says, with every number and name paired as the quote pairs them.
+Only include a finding when the quoted passage itself shows it. The absence of news is not a finding. Never use the words illegal, violation, or lawsuit, and never quote a passage that contains them.`;
+
+const LABEL = { own: "the brand's own site", known: "known source", other: "other site", junk: "other site" };
 
 // Call 2. No tools, so structured output works. Gemini only picks and quotes from text we fetched.
-export async function pickQuotes(brand: string, pages: SourcePage[]): Promise<Picked> {
+// name is the one the source rules match (ruleName), for telling the brand's own site apart.
+export async function pickQuotes(brand: string, pages: SourcePage[], name = brand): Promise<Picked> {
   const { output } = await generateText({
     model: google(MODEL),
     system: PICK_SYSTEM,
-    prompt: `Brand: ${brand}\n\n` + pages.map((p) => `=== ${p.id} ${p.host} ===\n${p.text}`).join("\n\n"),
+    prompt: `Brand: ${brand}\n\n` + pages.map((p) => `=== ${p.id} ${p.host} (${LABEL[kindOf(p.host, name)]}) ===\n${p.text}`).join("\n\n"),
     output: Output.object({ schema: pickSchema }),
     temperature: 0,
     providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } },
@@ -319,7 +388,7 @@ export function ruleName(input: BrandInput): string {
 export type Stage =
   | { stage: "search"; check: CheckKey; links: number }
   | { stage: "read"; found: number; read: number }
-  | { stage: "named"; pages: number }
+  | { stage: "named"; pages: number; known: number }
   | { stage: "picked"; findings: number }
   | { stage: "checked"; kept: number; removed: number };
 
@@ -333,16 +402,20 @@ export async function checkBrand(input: BrandInput, onStage: (s: Stage) => void 
   const pagesFound = found.length + (input.url ? 1 : 0);
   onStage({ stage: "read", found: pagesFound, read: read.filter(Boolean).length + (first ? 1 : 0) });
   // A page that never names the brand can't be evidence about it (a made-up brand otherwise collects generic
-  // pages about other companies). The link the shopper pasted is exempt.
+  // pages about other companies), and a junk site is never read. The link the shopper pasted is exempt.
+  // Known sources and the brand's own site go first, so the page cap never drops them for a lesser-known site.
   const name = ruleName(input);
-  const pages: SourcePage[] = [first, ...read.filter((p) => p && namesBrand(p.text, name))]
+  const lesser = (p: Page) => Number(kindOf(p.host, name) === "other");
+  const pages: SourcePage[] = [first, ...read.filter((p) => p && namesBrand(p.text, name) && kindOf(p.host, name) !== "junk")]
     .filter((p): p is Page => p !== null)
     .filter((p, i, all) => all.findIndex((q) => q.url === p.url) === i)
+    .sort((a, b) => lesser(a) - lesser(b))
+    .slice(0, MAX_PAGES)
     .map((p, i) => ({ ...p, id: `S${i + 1}` }));
-  onStage({ stage: "named", pages: pages.length });
+  onStage({ stage: "named", pages: pages.length, known: pages.filter((p) => kindOf(p.host, name) === "known").length });
   const base = { brand: input.name, pagesFound, pagesRead: pages.length };
   if (!pages.length) return { ...base, ...guardChecks({ checks: [] }, [], name) };
-  const picked = await pickQuotes(input.name, pages);
+  const picked = await pickQuotes(input.name, pages, name);
   onStage({ stage: "picked", findings: picked.checks.reduce((n, c) => n + c.findings.length, 0) });
   const guarded = guardChecks(picked, pages, name);
   const { mismatch, offCheck, wrongSite, banned } = guarded.removed;

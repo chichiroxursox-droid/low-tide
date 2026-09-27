@@ -1,11 +1,11 @@
 {
   "model": "gemini-2.5-flash",
-  "savedOn": "2026-09-26",
+  "savedOn": "2026-09-27",
   "brands": {
     "Patagonia": {
       "brand": "Patagonia",
-      "pagesFound": 12,
-      "pagesRead": 9,
+      "pagesFound": 20,
+      "pagesRead": 13,
       "checks": [
         {
           "check": "certifications",
@@ -13,41 +13,69 @@
           "signals": [
             {
               "sign": "good",
-              "quote": "Since 2000, Patagonia has worked with Bluesign Technologies , a third-party certification system that ensures textiles and products meet high standards for chemical safety and environmental impact. In 2007, Patagonia became the first brand to join the Bluesign System as a System Partner",
-              "note": "Patagonia has been a Bluesign System Partner since 2007, indicating a commitment to chemical safety and environmental impact standards in its textiles and products.",
-              "url": "https://bettertrail.com/sustainability/patagonia",
-              "host": "bettertrail.com",
-              "own": false
+              "quote": "VALUES CERTIFICATIONS Global Recycled Standard BCorp Bluesign Outdoorwear brand Patagonia uses lower-impact materials and traces most of its supply chain.",
+              "note": "Patagonia holds certifications for Global Recycled Standard, BCorp, and Bluesign.",
+              "url": "https://directory.goodonyou.eco/brand/patagonia",
+              "host": "directory.goodonyou.eco",
+              "own": false,
+              "known": true
             },
             {
               "sign": "good",
-              "quote": "In 2014, Patagonia began producing Fair Trade Certified (FTC) products and now offers more Fair Trade Certified apparel than any other brand, totalling over 1,000 styles.",
-              "note": "Patagonia offers over 1,000 Fair Trade Certified apparel styles, more than any other brand.",
-              "url": "https://bettertrail.com/sustainability/patagonia",
-              "host": "bettertrail.com",
-              "own": false
+              "quote": "Patagonia Works has been a Certified B Corp since December of 2011, and since then have dedicated themselves to upholding their core values.",
+              "note": "Patagonia has been a Certified B Corp since December 2011.",
+              "url": "https://career.uconn.edu/blog/2021/06/30/benefit-corporation-spotlight-patagonia/",
+              "host": "career.uconn.edu",
+              "own": false,
+              "known": true
             }
           ]
         },
         {
           "check": "climate",
-          "mark": "both",
+          "mark": "good",
           "signals": [
             {
               "sign": "good",
-              "quote": "The company has set Science Based Targets Initiative-verified goals aligned with Paris Agreement warming thresholds: reducing Scope 1 and 2 emissions (from owned facilities and purchased electricity) by 80% and Scope 3 emissions (from materials, supply chains, and transportation) by 55% by 2030, compared to a 2017 baseline.",
-              "note": "Patagonia has set Science Based Targets Initiative-verified goals to reduce its Scope 1 and 2 emissions by 80% and Scope 3 emissions by 55% by 2030, from a 2017 baseline.",
-              "url": "https://bettertrail.com/sustainability/patagonia",
-              "host": "bettertrail.com",
-              "own": false
+              "quote": "To hold ourselves accountable, we have set goals aligned with the Science Based Targets initiative (SBTi).",
+              "note": "Patagonia has set greenhouse gas emission reduction goals that are aligned with the Science Based Targets initiative.",
+              "url": "https://www.patagoniaworks.com/press/2023/9/15/the-climate-crisis-is-our-business",
+              "host": "patagoniaworks.com",
+              "own": true,
+              "known": false
             },
             {
-              "sign": "red",
-              "quote": "Between 2017 and 2025, Patagonia’s total, absolute emissions have increased by approximately 25%, from 145,848 metric tons of carbon dioxide equivalent (tCO2e) to 182,646 tCO2e",
-              "note": "Patagonia's total absolute emissions increased by approximately 25% between 2017 and 2025, despite its reduction goals.",
-              "url": "https://bettertrail.com/sustainability/patagonia",
-              "host": "bettertrail.com",
-              "own": false
+              "sign": "good",
+              "quote": "Near-Term – FY2030: · Reduce absolute Scope 1 and Scope 2 emissions 80%. · Reduce absolute Scope 3 emissions from purchased goods and services, upstream transportation and distribution, business travel and downstream transportation and distribution 55%.",
+              "note": "Patagonia aims to reduce its Scope 1 and 2 emissions by 80% and Scope 3 emissions by 55% by fiscal year 2030.",
+              "url": "https://www.patagoniaworks.com/press/2023/9/15/the-climate-crisis-is-our-business",
+              "host": "patagoniaworks.com",
+              "own": true,
+              "known": false
+            }
+          ]
+        },
+        {
+          "check": "labor",
+          "mark": "good",
+          "signals": [
+            {
+              "sign": "good",
+              "quote": "Some of its supply chain is certified by Fair Labor Association (FLA) and Fair Trade USA including all of the final stage of production.",
+              "note": "Parts of Patagonia's supply chain, including the final production stage, are certified by the Fair Labor Association and Fair Trade USA.",
+              "url": "https://directory.goodonyou.eco/brand/patagonia",
+              "host": "directory.goodonyou.eco",
+              "own": false,
+              "known": true
+            },
+            {
+              "sign": "good",
+              "quote": "Some of its supply chain is certified by FLA Workplace Code of Conduct and Fair Trade USA in the final stage of production.",
+              "note": "Patagonia's supply chain includes certifications from the FLA Workplace Code of Conduct and Fair Trade USA for its final production stage.",
+              "url": "https://goodonyou.eco/how-ethical-is-patagonia/",
+              "host": "goodonyou.eco",
+              "own": false,
+              "known": true
             }
           ]
         },
@@ -58,18 +86,20 @@
             {
               "sign": "good",
               "quote": "Overall rating: Good Our ratings are based on a scale from 1 (We avoid) to 5 (Great) How we rate Our “Planet” rating evaluates brands based on the environmental policies in their supply chains, from carbon emissions and wastewater to business models and product circularity. Here we rate Patagonia “Good”.",
-              "note": "Good On You rates Patagonia as 'Good' overall and for its environmental policies.",
+              "note": "Patagonia has an overall 'Good' rating from Good On You, with a 'Good' rating for its planet impact.",
               "url": "https://directory.goodonyou.eco/brand/patagonia",
               "host": "directory.goodonyou.eco",
-              "own": false
+              "own": false,
+              "known": true
             },
             {
               "sign": "good",
-              "quote": "Its most recent B Impact score was 166 out of more than 250 possible points—well above the 80-point certification threshold and the median score of 51 for typical businesses.",
-              "note": "Patagonia achieved a B Impact score of 166, significantly higher than the 80-point certification threshold and the median business score of 51.",
-              "url": "https://bettertrail.com/sustainability/patagonia",
-              "host": "bettertrail.com",
-              "own": false
+              "quote": "Workers’ rights are central to our “People” rating, which assess brands’ policies and practices on everything from child labour to living wages and gender equality. Here we rate Patagonia “Good”.",
+              "note": "Patagonia received a 'Good' rating for its 'People' impact, which focuses on workers' rights.",
+              "url": "https://directory.goodonyou.eco/brand/patagonia",
+              "host": "directory.goodonyou.eco",
+              "own": false,
+              "known": true
             }
           ]
         },
@@ -79,11 +109,21 @@
           "signals": [
             {
               "sign": "red",
-              "quote": "The company hired Patagonia understood this at a cost by receiving a complaint for greenwashing accepted by the advertising ethics jury in France. Clothing made from recycled materials “that protect the oceans”",
-              "note": "Patagonia received a complaint for greenwashing, accepted by the advertising ethics jury in France, regarding claims that its recycled clothing protects the oceans.",
+              "quote": "The company hired Patagonia understood this at a cost by receiving a complaint for greenwashing accepted by the advertising ethics jury in France.",
+              "note": "Patagonia received a greenwashing complaint accepted by the advertising ethics jury in France.",
               "url": "https://www.giveactions.com/en/post/meme-les-marques-engagees-peuvent-tomber-dans-le-piege-du-greenwashing",
               "host": "giveactions.com",
-              "own": false
+              "own": false,
+              "known": false
+            },
+            {
+              "sign": "red",
+              "quote": "The jury considered the matter and accepted the complaint against Patagonia. Indeed, the communication was considered disproportionate.",
+              "note": "The advertising ethics jury in France found Patagonia's communication to be disproportionate and accepted a complaint against it.",
+              "url": "https://www.giveactions.com/en/post/meme-les-marques-engagees-peuvent-tomber-dans-le-piege-du-greenwashing",
+              "host": "giveactions.com",
+              "own": false,
+              "known": false
             }
           ]
         }
@@ -97,8 +137,8 @@
     },
     "H&M": {
       "brand": "H&M",
-      "pagesFound": 12,
-      "pagesRead": 10,
+      "pagesFound": 20,
+      "pagesRead": 15,
       "checks": [
         {
           "check": "certifications",
@@ -111,19 +151,27 @@
           "signals": [
             {
               "sign": "good",
-              "quote": "Our climate targets have been validated by the Science Based Targets initiative (SBTi) , an independent organisation that assesses whether corporate emissions-reduction targets are aligned with climate science.",
-              "note": "H&M Group's climate targets have been validated by the Science Based Targets initiative (SBTi).",
+              "quote": "For absolute Scope 3 emissions, we reported a reduction of nearly 35 percent compared with 2019. The main factors contributing to these reductions include improved material efficiency, increased energy efficiency, greater use of renewable electricity, a reduction in on-site coal, and a growing share of recycled materials.",
+              "note": "H&M Group reported a reduction of nearly 35 percent in absolute Scope 3 emissions compared with 2019.",
               "url": "https://hmgroup.com/sustainability/circularity-and-climate/climate/",
               "host": "hmgroup.com",
-              "own": true
-            },
+              "own": true,
+              "known": false
+            }
+          ]
+        },
+        {
+          "check": "labor",
+          "mark": "red",
+          "signals": [
             {
-              "sign": "good",
-              "quote": "In our 2025 annual and sustainability report , we reported a 41 percent reduction in Scope 1 and 2 greenhouse gas emissions compared with 2019, our baseline year. This reduction was mainly linked to increased purchasing of renewable electricity.",
-              "note": "H&M Group reported a 41% reduction in Scope 1 and 2 greenhouse gas emissions by 2025 compared to 2019, largely due to increased renewable electricity purchases.",
-              "url": "https://hmgroup.com/sustainability/circularity-and-climate/climate/",
-              "host": "hmgroup.com",
-              "own": true
+              "sign": "red",
+              "quote": "Also in 2018, factories that supply H&M were named in reports by Global Labour Justice detailing abuse of female garment workers, and more recently in 2023, workers’ rights abuses from the brand’s suppliers in Myanmar came to light.",
+              "note": "Factories supplying H&M were named in reports detailing abuse of female garment workers in 2018 and workers' rights abuses in Myanmar in 2023.",
+              "url": "https://goodonyou.eco/how-ethical-is-hm/",
+              "host": "goodonyou.eco",
+              "own": false,
+              "known": true
             }
           ]
         },
@@ -138,26 +186,28 @@
           "signals": [
             {
               "sign": "red",
-              "quote": "H&M Norway has been called out for “greenwashing” following an investigation into its Conscious Collection conducted by the Norwegian Consumer Authority (CA) . The Swedish clothing giant was criticized for potentially “ misleading ” marketing ploys, as the CA says H&M provides “insufficient” information about the sustainability of the collection.",
-              "note": "The Norwegian Consumer Authority criticized H&M for potentially misleading marketing of its Conscious Collection, stating it provided insufficient information about its sustainability.",
-              "url": "https://hypebeast.com/2019/8/h-m-conscious-collection-greenwashing-sustainability-norwegian-consumer-authority",
-              "host": "hypebeast.com",
-              "own": false
+              "quote": "Fashion retailer H&M and sporting goods chain Decathlon have made commitments to the Netherlands Authority for Consumers and Markets (ACM) to remove sustainability-related labels from their products and websites, and to improve the use of sustainability claims in the future, following an investigation by the Dutch regulator.",
+              "note": "H&M made commitments to the Netherlands Authority for Consumers and Markets (ACM) to remove sustainability-related labels and improve sustainability claims after an investigation.",
+              "url": "https://www.esgtoday.com/hm-to-remove-sustainability-labels-from-products-following-investigation-by-regulator/",
+              "host": "esgtoday.com",
+              "own": false,
+              "known": true
             },
             {
               "sign": "red",
-              "quote": "Their investigation came under the Marketing Control Act in Norway , Section 2 of which states that marketing cannot contain ‘an incorrect or otherwise misleading representation which is likely to influence the demand for or supply of goods’.",
-              "note": "Norway's Consumer Authority investigated H&M's sustainability claims under a law that prohibits misleading marketing.",
-              "url": "https://tabithawhiting.com/2024/02/23/hms-conscious-collection/",
-              "host": "tabithawhiting.com",
-              "own": false
+              "quote": "In its investigation, ACM found that H&M uses sustainability claims such as “Conscious” and “Conscious Choice,” without explaining what they mean, or providing a description of the sustainability benefits of the products.",
+              "note": "The ACM found that H&M uses sustainability claims like \"Conscious\" and \"Conscious Choice\" without explaining their meaning or providing sustainability benefits.",
+              "url": "https://www.esgtoday.com/hm-to-remove-sustainability-labels-from-products-following-investigation-by-regulator/",
+              "host": "esgtoday.com",
+              "own": false,
+              "known": true
             }
           ]
         }
       ],
       "removed": {
-        "mismatch": 0,
-        "offCheck": 1,
+        "mismatch": 5,
+        "offCheck": 0,
         "wrongSite": 2,
         "banned": 0
       }

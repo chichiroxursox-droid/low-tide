@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
 import {
-  htmlToText, isSafeUrl, parseBrandInput, readPage, guardChecks, verdictFor, namesBrand, hostNamesBrand, ruleName, CHECKS,
+  htmlToText, isSafeUrl, parseBrandInput, readPage, guardChecks, verdictFor, namesBrand, hostNamesBrand, ruleName, sourceTier, CHECKS,
   type Picked, type SourcePage, type CheckKey, type CheckResult, type Mark,
 } from "./brand.ts";
 import { verifyQuote, BANNED } from "./guard.ts";
@@ -64,14 +64,18 @@ const RATING = "Our rating for the brand is Good, based on its use of lower impa
 const LOW = "Our rating for the brand is Not Good Enough because it discloses almost nothing about its supply chain emissions";
 const WATCH = "The consumer authority found the sustainability claims on its website were vague and could mislead shoppers";
 const LEGAL = "The company settled a lawsuit over how it marketed recycled materials in its outdoor clothing line";
+const LABOR = "An investigation found workers at two of its supplier factories were paid below the minimum wage for months";
+const FAIR = "The brand is an accredited member of the Fair Labor Association, which audits the factories that make its products";
 
 const PAGES = [
-  page("S1", "brand.example", `${CERT}. ${CLIMATE}. ${LOW}`), // the brand's own site
+  page("S1", "brand.example", `${CERT}. ${CLIMATE}. ${LOW}. ${FAIR}`), // the brand's own site
   page("S2", "bcorp.example", CERT),
   page("S3", "rater.example", `${RATING}. ${LOW}`),
   page("S4", "regulator.example", WATCH),
   page("S5", "shop.brand.example", RATING), // the brand's shop, a subdomain of its site
   page("S6", "law.example", LEGAL),
+  page("S7", "reuters.com", `${LABOR}. ${WATCH}`), // a known source
+  page("S8", "blog.example", `${FAIR}. ${RATING}`), // a lesser-known site
 ];
 type Raw = Picked["checks"][number]["findings"][number];
 const f = (sign: Raw["sign"], sourceId: string, quote: string, note = "A plain note."): Raw => ({ sign, sourceId, quote, note });
@@ -112,7 +116,7 @@ test("guardChecks keeps verified findings and marks every check, in order", () =
     watchdogs: [f("red", "S4", WATCH)],
   });
   assert.deepEqual(r.checks.map((c) => c.check), [...CHECKS]);
-  assert.deepEqual(marks(r), { certifications: "good", climate: "good", ratings: "both", watchdogs: "red" });
+  assert.deepEqual(marks(r), { certifications: "good", climate: "good", labor: "not_found", ratings: "both", watchdogs: "red" });
   assert.deepEqual(r.removed, { mismatch: 0, offCheck: 0, wrongSite: 0, banned: 0 });
   assert.equal(r.checks[1].signals[0].own, true);
   assert.equal(r.checks[0].signals[0].own, false);
@@ -121,7 +125,7 @@ test("guardChecks keeps verified findings and marks every check, in order", () =
 
 test("a check with no surviving quote is not found", () => {
   const r = guard({ certifications: [f("good", "S2", CERT.replace("151.4", "160"))] });
-  assert.deepEqual(marks(r), { certifications: "not_found", climate: "not_found", ratings: "not_found", watchdogs: "not_found" });
+  assert.deepEqual(marks(r), { certifications: "not_found", climate: "not_found", labor: "not_found", ratings: "not_found", watchdogs: "not_found" });
   assert.equal(r.removed.mismatch, 1);
 });
 
@@ -143,7 +147,7 @@ test("the brand's own site can back climate action and can show a red rating", (
   const r = guard({ climate: [f("good", "S1", CLIMATE)], ratings: [f("red", "S1", LOW)] });
   assert.equal(marks(r).climate, "good");
   assert.equal(marks(r).ratings, "red");
-  assert.equal(r.checks[2].signals[0].own, true);
+  assert.equal(r.checks[3].signals[0].own, true);
   assert.equal(r.removed.wrongSite, 0);
 });
 
@@ -171,25 +175,62 @@ test("at most 2 findings per check, first entry wins for a repeated check, notes
     ],
   };
   const r = guardChecks(picked, PAGES, "Brand");
-  assert.equal(r.checks[2].signals.length, 2);
+  assert.equal(r.checks[3].signals.length, 2);
   assert.equal(marks(r).ratings, "good");
-  assert.equal(BANNED.test(r.checks[2].signals[0].note), false);
+  assert.equal(BANNED.test(r.checks[3].signals[0].note), false);
+});
+
+test("labor can go either way, but the brand can't vouch for its own factories", () => {
+  const r = guard({ labor: [f("good", "S1", FAIR), f("red", "S7", LABOR)] });
+  assert.equal(marks(r).labor, "red");
+  assert.equal(r.removed.wrongSite, 1);
+  assert.equal(marks(guard({ labor: [f("good", "S8", FAIR)] })).labor, "good");
+});
+
+test("known sources come first: a lesser-known site only speaks for a check nothing better covers", () => {
+  const r = guard({
+    climate: [f("red", "S3", LOW), f("good", "S1", CLIMATE), f("red", "S7", LABOR)],
+    ratings: [f("good", "S8", RATING)],
+    watchdogs: [f("red", "S4", WATCH), f("red", "S7", WATCH)],
+  });
+  const hosts = (i: number) => r.checks[i].signals.map((s) => s.host);
+  assert.deepEqual(hosts(1), ["brand.example", "reuters.com"]); // the brand's own site stays next to a known source
+  assert.equal(marks(r).climate, "both");
+  assert.deepEqual(hosts(3), ["blog.example"]); // nothing better covers ratings
+  assert.equal(r.checks[3].signals[0].known, false);
+  assert.deepEqual(hosts(4), ["reuters.com"]);
+  assert.equal(r.checks[4].signals[0].known, true);
+  assert.deepEqual(r.removed, { mismatch: 0, offCheck: 0, wrongSite: 0, banned: 0 });
+});
+
+test("sourceTier knows established publishers and official sites, and never reads junk", () => {
+  for (const h of ["reuters.com", "news.bbc.co.uk", "directory.goodonyou.eco", "ftc.gov", "gov.uk", "hmrc.gov.uk",
+    "economie.gouv.fr", "ec.europa.eu", "harvard.edu", "ox.ac.uk", "forbrukertilsynet.no", "business-humanrights.org"]) {
+    assert.equal(sourceTier(h), "known", h);
+  }
+  for (const h of ["bettertrail.com", "giveactions.com", "tabithawhiting.com", "notreuters.com", "reuters.com.evil.io",
+    "microsoft.com", "en.wikipedia.org", "gov.example.com", "evil-gov.uk"]) {
+    assert.equal(sourceTier(h), "other", h);
+  }
+  for (const h of ["reddit.com", "old.reddit.com", "someone.wordpress.com", "amazon.com", "studocu.com"]) {
+    assert.equal(sourceTier(h), "junk", h);
+  }
 });
 
 const mk = (...ms: Mark[]): CheckResult[] => ms.map((mark, i) => ({ check: CHECKS[i], mark, signals: [] }));
 
 test("verdictFor follows the rule on every branch", () => {
   const v = (...ms: Mark[]) => verdictFor(mk(...ms)).verdict;
-  assert.equal(v("good", "not_found", "not_found", "not_found"), "not_enough");
-  assert.equal(v("not_found", "not_found", "not_found", "not_found"), "not_enough");
-  assert.equal(v("good", "good", "good", "not_found"), "strong");
-  assert.equal(v("good", "good", "good", "both"), "mixed");
-  assert.equal(v("good", "good", "red", "not_found"), "mixed");
-  assert.equal(v("good", "good", "not_found", "not_found"), "mixed");
-  assert.equal(v("both", "good", "not_found", "not_found"), "mixed");
-  assert.equal(v("good", "red", "not_found", "not_found"), "red_flags");
-  assert.equal(v("red", "red", "not_found", "not_found"), "red_flags");
-  assert.deepEqual(verdictFor(mk("good", "good", "red", "both")), { verdict: "mixed", good: 2, red: 1 });
+  assert.equal(v("good", "not_found", "not_found", "not_found", "not_found"), "not_enough");
+  assert.equal(v("not_found", "not_found", "not_found", "not_found", "not_found"), "not_enough");
+  assert.equal(v("good", "good", "good", "not_found", "not_found"), "strong");
+  assert.equal(v("good", "good", "good", "both", "not_found"), "mixed");
+  assert.equal(v("good", "good", "red", "good", "not_found"), "mixed"); // a labor red flag counts like any other
+  assert.equal(v("good", "good", "not_found", "not_found", "not_found"), "mixed");
+  assert.equal(v("both", "good", "not_found", "not_found", "not_found"), "mixed");
+  assert.equal(v("good", "red", "not_found", "not_found", "not_found"), "red_flags");
+  assert.equal(v("red", "red", "not_found", "good", "not_found"), "red_flags");
+  assert.deepEqual(verdictFor(mk("good", "good", "red", "both", "not_found")), { verdict: "mixed", good: 2, red: 1 });
 });
 
 test("isSafeUrl allows public web pages and refuses everything else", () => {

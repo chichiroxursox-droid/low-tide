@@ -17,9 +17,9 @@ type Result = {
   note?: string;
 };
 
-type CheckKey = "certifications" | "climate" | "ratings" | "watchdogs";
+type CheckKey = "certifications" | "climate" | "labor" | "ratings" | "watchdogs";
 type Mark = "good" | "red" | "both" | "not_found";
-type Signal = { sign: "good" | "red"; quote: string; note: string; url: string; host: string; own: boolean };
+type Signal = { sign: "good" | "red"; quote: string; note: string; url: string; host: string; own: boolean; known: boolean };
 type Check = { check: CheckKey; mark: Mark; signals: Signal[] };
 type BrandVerdict = "strong" | "mixed" | "red_flags" | "not_enough";
 type BrandResult = {
@@ -41,7 +41,7 @@ type BrandResult = {
 type Stage =
   | { stage: "search"; check: CheckKey; links: number }
   | { stage: "read"; found: number; read: number }
-  | { stage: "named"; pages: number }
+  | { stage: "named"; pages: number; known: number }
   | { stage: "picked"; findings: number }
   | { stage: "checked"; kept: number; removed: number };
 
@@ -66,10 +66,11 @@ const BRAND_VERDICT: Record<BrandVerdict, { label: string; tone: Tone }> = {
 const CHECK_TITLE: Record<CheckKey, string> = {
   certifications: "Certifications",
   climate: "Climate action",
+  labor: "Labor and sourcing",
   ratings: "Independent ratings",
   watchdogs: "Regulator and watchdog findings",
 };
-const CHECK_ORDER: CheckKey[] = ["certifications", "climate", "ratings", "watchdogs"];
+const CHECK_ORDER: CheckKey[] = ["certifications", "climate", "labor", "ratings", "watchdogs"];
 const MARK: Record<Mark, { label: string; tone: Tone }> = {
   good: { label: "Good sign", tone: "green" },
   red: { label: "Red flag", tone: "red" },
@@ -96,8 +97,8 @@ function removedLine(w: BrandResult["removedWhy"]) {
     w.offCheck && `${w.offCheck} didn’t fit ${w.offCheck === 1 ? "its check" : "their checks"}`,
     w.wrongSite &&
       (w.wrongSite === 1
-        ? "1 was the brand vouching for its own certification or rating"
-        : `${w.wrongSite} were the brand vouching for its own certifications or ratings`),
+        ? "1 was the brand vouching for itself on a certification, rating or labor record"
+        : `${w.wrongSite} were the brand vouching for itself on certifications, ratings or labor records`),
     w.banned && `${w.banned} used legal wording Low Tide doesn’t show`,
   ].filter(Boolean);
   return `${n} ${n === 1 ? "quote" : "quotes"} removed: ${parts.join(", ")}.`;
@@ -343,11 +344,11 @@ function brandRows(brand: string, stages: Stage[]): Row[] {
         </span>
       ),
     },
-    { label: "Download the pages", done: !!read, detail: read ? `Read ${read.read} of ${read.found}` : "Up to 12 pages" },
+    { label: "Download the pages", done: !!read, detail: read ? `Read ${read.read} of ${read.found}` : "Up to 20 pages" },
     {
-      label: `Keep only pages that name ${brand}`,
+      label: `Drop junk sites and pages that don’t name ${brand}`,
       done: !!named,
-      detail: named ? `${named.pages} ${named.pages === 1 ? "names" : "name"} ${brand}` : undefined,
+      detail: named ? `${named.pages} kept, ${named.known} from known sources` : undefined,
     },
     { label: "Gemini picks quotes for each check", done: !!picked, detail: picked ? `${picked.findings} picked` : undefined },
     {
@@ -469,7 +470,7 @@ function CheckRow({ c }: { c: Check }) {
                   <a href={s.url} target="_blank" rel="noreferrer" className="font-bold underline decoration-2 underline-offset-2">
                     {s.host}
                   </a>
-                  {s.own && <span className="ml-2 text-water/70">their own site</span>}
+                  {(s.own || !s.known) && <span className="ml-2 text-water/70">{s.own ? "their own site" : "lesser-known site"}</span>}
                 </span>
                 <span className="text-water/70">Quote checked word for word against this page</span>
               </figcaption>
@@ -536,7 +537,7 @@ export default function Home() {
   const [claim, setClaim] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
-  const [mode, setMode] = useState<"claim" | "brand">("claim");
+  const [mode, setMode] = useState<"claim" | "brand">("brand");
   const [brand, setBrand] = useState("");
   const [brandResult, setBrandResult] = useState<BrandResult | null>(null);
   const [loading, setLoading] = useState<null | "claim" | "brand">(null);
@@ -627,13 +628,13 @@ export default function Home() {
               <p className="mt-6 max-w-[52ch] text-lg leading-relaxed">
                 {mode === "claim"
                   ? "Paste a green claim. Get the exact FTC Green Guides passage behind every answer, checked word for word."
-                  : "Type a brand. Gemini 2.5 Flash gathers the evidence, and Low Tide checks every quote word for word before the flag goes up."}
+                  : "Type a brand. Gemini 2.5 Flash gathers the evidence on how it treats the planet and the people who make its products, and Low Tide checks every quote word for word before the flag goes up."}
               </p>
             </div>
             <FlagLegend mode={mode} />
           </div>
           <div role="group" aria-label="What to check" className="mt-9 flex gap-1.5">
-            {(["claim", "brand"] as const).map((m) => (
+            {(["brand", "claim"] as const).map((m) => (
               <button
                 key={m}
                 type="button"
@@ -796,7 +797,7 @@ export default function Home() {
             </>
           )
         ) : loading === "brand" ? (
-          <TideLoader title={`Checking ${brand} live`} hint="About 20 seconds. The tide goes out as each step finishes." rows={brandRows(brand, stages)} />
+          <TideLoader title={`Checking ${brand} live`} hint="About 30 seconds. The tide goes out as each step finishes." rows={brandRows(brand, stages)} />
         ) : !brandResult ? (
           <Idle>Pick a sample brand or type one. The answer shows up here.</Idle>
         ) : brandResult.error ? (
@@ -816,6 +817,10 @@ export default function Home() {
                   </div>
                 )}
                 <p className="mt-4 max-w-[65ch] text-sm text-water/75">This describes the evidence Low Tide could verify, not a certification.</p>
+                <p className="mt-1 max-w-[65ch] text-sm text-water/75">
+                  Known sources come first: regulators, universities, established news outlets, and recognized certifiers, raters
+                  and rights groups. A check uses a lesser-known site only when no known source covers it.
+                </p>
                 <p className="mt-1 max-w-[65ch] text-sm text-water/75">
                   {brandResult.source === "sample" && brandResult.savedOn
                     ? `Saved answer from ${modelName(brandResult.model)} with Google Search, checked against these pages on ${savedDate(brandResult.savedOn)}.`
