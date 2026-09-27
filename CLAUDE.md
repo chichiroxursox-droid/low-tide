@@ -12,13 +12,13 @@ AI SDK v7 has no `generateObject`. Structured output goes through `generateText(
 Brand mode searches with `google.tools.googleSearch`, which ships in `@ai-sdk/google`, so no new dependency. Gemini 2.5 Flash rejects a tool and structured output in the same call, so search and structured output are two separate calls.
 
 ## Files
-- `app/page.tsx`: the lifeguard board (see DESIGN.md): red stencil header with the "What the flags mean" sign, claim/brand tabs, entry strip and sample plaques, claim finding rows with flags and the tamper test (a pulled row stays, flag lowered, swapped word struck through), the brand verdict on a flag pole with four check rows, the tide loader for live checks, footer
+- `app/page.tsx`: the lifeguard board (see DESIGN.md): red stencil header with the "What the flags mean" sign, brand/claim tabs (brand first, and the page opens on it), entry strip and sample plaques, claim finding rows with flags and the tamper test (a pulled row stays, flag lowered, swapped word struck through), the brand verdict on a flag pole with five check rows (a non-own source off the known list is tagged "lesser-known site"), the tide loader for live checks, footer
 - `app/api/check/route.ts`: one Gemini call, then the guard. Returns JSON on every path, never a 500
 - `lib/guides.json`: Green Guides sections from eCFR, shape `{ section, title, text, url }`. Scope: 260.4, 260.5, 260.7, 260.8, 260.12, 260.13
 - `lib/guard.ts`: `verifyQuote(quote, sectionText)`, a pure normalized substring check (whitespace, curly quotes, dash variants)
 - `lib/guard.test.ts`: `node --test` cases: real quote passes, one changed word fails, quote from the wrong section fails
 - `fixtures/`: saved Gemini output for the sample claims. Samples are served from here, so the app works with no API key
-- `lib/brand.ts`: brand pipeline: input parsing, `isSafeUrl`, `readPage`, `namesBrand`, `hostNamesBrand`, `ruleName`, the four searches (`findSources`), the pick call (`pickQuotes`), `guardChecks`, `verdictFor`, `checkBrand`
+- `lib/brand.ts`: brand pipeline: input parsing, `isSafeUrl`, `readPage`, `namesBrand`, `hostNamesBrand`, `ruleName`, `sourceTier` (the known and junk source lists), the five searches (`findSources`), the pick call (`pickQuotes`), `guardChecks`, `verdictFor`, `checkBrand`
 - `lib/brand.test.ts`: `node --test` cases for `htmlToText`, `isSafeUrl`, `parseBrandInput`, `readPage`, `namesBrand`, `hostNamesBrand`, `ruleName`, every `guardChecks` source rule and mark, and every `verdictFor` branch
 - `app/api/brand/route.ts`: brand samples, live brand check, offline line, "Couldn't find enough" line, verdict from `verdictFor` at serve time. Samples and errors return JSON; a live brand check streams NDJSON (one `stage` line per real step from `checkBrand`, then one `result` line) so the tide loader shows real progress. Never a 500
 - `fixtures/brands.json`: saved brand checks for Patagonia (Mixed record) and H&M (Red flags), guarded at seed time and unedited, so brand samples work with no API key. No verdict is saved; the route computes it
@@ -33,16 +33,18 @@ Output: `{ findings: [{ phrase, section, verdict, why, quote }] }` where verdict
 - `not_covered` means the Guides don't address the phrase. It is its own visible state, never shoehorned into a section, and needs no quote
 
 ### Brand mode contract
-Brand mode answers "Is this brand sustainable?" with a verdict built from four checks: `certifications`, `climate`, `ratings`, `watchdogs`. It has no brand claims, no "They say / Others say" cards and no Guides reading.
-Call 1 (`findSources`): four Google Searches in parallel, one per check, with `googleSearch`. Gemini's text is thrown away. Links come only from the SDK's sources, up to 4 per check, interleaved, deduplicated, max 12. A failed search brings no links. The server downloads the pages itself, a pasted link first.
-Page name filter: a downloaded page that never names the brand (`namesBrand`: whole words read with the spaces squeezed out, "&" as "and" or left out, a possessive "'s" optional, accents stripped) is dropped before call 2. The pasted link is exempt. With no readable page left, the route says "Couldn't find enough about X to check." and makes no pick call.
-Call 2 (`pickQuotes`): no tools, gets the readable pages as `=== S<n> <host> ===` blocks. Output: `{ checks: [{ check, findings: [{ sign, sourceId, quote, note }] }] }` where sign is `good` or `red`. Gemini does not say which sites are the brand's own; code does.
+Brand mode answers "Is this brand sustainable?", for the planet and for the people who make its products, with a verdict built from five checks: `certifications`, `climate`, `labor`, `ratings`, `watchdogs`. It has no brand claims, no "They say / Others say" cards and no Guides reading.
+Call 1 (`findSources`): five Google Searches in parallel, one per check, with `googleSearch`, each asking for regulators, established news and recognized certifiers, raters and rights groups over blogs, forums, social media and shops. Gemini's text is thrown away. Links come only from the SDK's sources, up to 4 per check, interleaved, deduplicated (so at most 20). A failed search brings no links. The server downloads the pages itself, a pasted link first.
+Page name filter: a downloaded page that never names the brand (`namesBrand`: whole words read with the spaces squeezed out, "&" as "and" or left out, a possessive "'s" optional, accents stripped) is dropped before call 2.
+Source tiers (`sourceTier`, by host): `known` (a hand-kept list of established news outlets, certifiers, raters, rights groups and regulators, plus any government, university or EU address), `junk` (sites anyone can post to, shops, essay mills), or `other`. The brand's own site is never junk. Junk pages are dropped before call 2. Known and own pages are sorted ahead of other pages, and at most 15 pages go to call 2. The pasted link is exempt from both filters. With no readable page left, the route says "Couldn't find enough about X to check." and makes no pick call.
+Call 2 (`pickQuotes`): no tools, gets the readable pages as `=== S<n> <host> (<kind>) ===` blocks, where kind is known source, the brand's own site, or other site, and is told to quote known sources first. Output: `{ checks: [{ check, findings: [{ sign, sourceId, quote, note }] }] }` where sign is `good` or `red`. Gemini does not say which sites are the brand's own; code does.
 Guard (`guardChecks`, pure):
-- Only the first 2 findings per check are read. A finding is kept only if its source exists and its quote passes `verifyQuote` against that page, else `mismatch`
-- Signs per check: certifications only `good`, watchdogs only `red`, climate and ratings either. Anything else is `offCheck`
+- Only the first 3 findings per check are read, and at most 2 are kept. A finding is kept only if its source exists and its quote passes `verifyQuote` against that page, else `mismatch`
+- Signs per check: certifications only `good`, watchdogs only `red`, climate, labor and ratings either. Anything else is `offCheck`
 - A page is the brand's own when a label of its host starts with the brand's name, "the" or "about" allowed in front (`hostNamesBrand`). A name under 4 characters must be the whole label, a company word like "group" aside, so `hmrc.gov.uk` isn't H&M's. For a link, the name is the label its site is registered under (`ruleName`: `www2.hm.com` is "hm"). A parent company's site is not recognized
-- Certifications and ratings: a `good` finding from a brand-owned page is `wrongSite`, because the brand can't vouch for itself. Climate may come from the brand's own site. `red` findings may come from any source
+- Certifications, labor and ratings: a `good` finding from a brand-owned page is `wrongSite`, because the brand can't vouch for itself. Climate may come from the brand's own site. `red` findings may come from any source
 - A quote or source host containing a banned word is `banned`
+- Known sources first: when a check keeps a finding from a known source, its findings from other (lesser-known) sites are dropped, and its own-site findings stay. These surplus findings are not counted as removed. Each signal carries `own` and `known`
 - Notes go through `soften`. Each check's mark comes from what survives: `good`, `red`, `both`, or `not_found`
 - Removed findings are counted as `mismatch`, `offCheck`, `wrongSite`, `banned`, and the UI says how many were removed and why
 
@@ -72,8 +74,8 @@ Tamper test (owner-approved): a link on each verified card changes one word of i
 - Never cut: the guard and its test, the brand guard and its tests, the `not_covered` state, the footer, the cached samples
 
 ## Demo path (under 90s, prod URL only)
-1. Chip "Biodegradable plastic bag": needs qualification, 260.8 quote highlighted
-2. Chip "Made with ocean plastic": not covered, and why saying so matters
-3. Switch to "A brand", sample H&M: Red flags verdict and the Norwegian Consumer Authority quote
-4. Switch back to "A claim": a live claim
+1. The page opens on "A brand". Sample H&M: Red flags verdict, the labor red flag, and the Dutch regulator (ACM) quote on its "Conscious" labels
+2. Switch to "A claim", chip "Biodegradable plastic bag": needs qualification, 260.8 quote highlighted
+3. Chip "Made with ocean plastic": not covered, and why saying so matters
+4. A live claim
 5. Tamper test once (claim mode only) to show the "finding removed" line
